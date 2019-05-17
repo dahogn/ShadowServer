@@ -1,4 +1,4 @@
-package com.runhang.shadow.demo.demo;
+package com.runhang.shadow.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
