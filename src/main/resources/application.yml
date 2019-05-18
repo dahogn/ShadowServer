@@ -1,1 +1,24 @@
+server:
+  port: 8080
+  tomcat:
+    uri-encoding: utf-8
+
+#MySQL
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/template?characterEncoding=utf8&useSSL=false
+    username: root
+    password: root
+
+#mqtt
+com:
+  mqtt:
+    host: 211.87.235.161
+    port: 1883
+    username: guest
+    password: guest
+    timeout: 60
+    keepAlive: 180
+    preFix: 'tcp://'
 

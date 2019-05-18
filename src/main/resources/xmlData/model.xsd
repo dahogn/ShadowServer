@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:simpleType name="stringType">
+        <xs:restriction base="xs:string" />
+    </xs:simpleType>
+
+    <!-- define class attribution -->
+    <xs:complexType name="attrType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="type" type="stringType" use="required" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="mapType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="key" type="stringType" use="required" />
+                <xs:attribute name="value" type="stringType" use="required" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- define class -->
+    <xs:complexType name="classType">
+        <xs:sequence>
+            <xs:element name="field" type="attrType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="list" type="attrType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="map" type="mapType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="type" type="stringType" use="required" />
+    </xs:complexType>
+
+    <!-- define class list -->
+    <xs:complexType name="classesType">
+        <xs:sequence>
+            <xs:element name="class" maxOccurs="unbounded" type="classType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="classes" type="classesType" />
+
+</xs:schema>
