@@ -1,5 +1,8 @@
 package com.runhang.shadow.demo.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+
 import javax.tools.*;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -8,10 +11,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @ClassName ClassUtils
@@ -19,6 +19,7 @@ import java.util.Map;
  * @Date 2019/5/18 10:22
  * @author szh
  **/
+@Slf4j
 public class ClassUtils {
 
     // getter & setter 选项
@@ -128,7 +129,25 @@ public class ClassUtils {
         List<String> optionList = new ArrayList<>(Arrays.asList("-d", CLASS_FILE_PATH));
         // 设置编译环境
         JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, null, optionList, null, fileObjectList);
-        return task.call();
+        boolean compileResult = task.call();
+        if (!compileResult) {
+            // 编译失败删除java文件
+            deleteJavaFiles(classCode.keySet());
+        }
+        return compileResult;
+    }
+
+    /**
+     * @Description 删除生成的java文件
+     * @param fileName 文件名
+     * @author szh
+     * @Date 2019/5/20 9:38
+     */
+    private static void deleteJavaFiles(Set<String> fileName) {
+        for (String name : fileName) {
+            File javaFile = new File(JAVA_FILE_PATH + name + ".java");
+            FileUtils.deleteQuietly(javaFile);
+        }
     }
 
     /**

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classes>
     <class type="User">
-        <field type="int">name</field>
+        <field type="String">name</field>
         <field type="String">username</field>
-        <list type="Double">phone</list>
-        <list type="Pen">pen</list>
-        <map key="String" value="Phone">phoneMap</map>
+        <list type="Laptop">laptop</list>
+        <map key="String" value="Pen">penMap</map>
     </class>
 
     <class type="Laptop">
@@ -18,8 +17,4 @@
         <field type="double">price</field>
     </class>
 
-    <class type="Phone">
-        <field type="double">wight</field>
-        <field type="String">mac</field>
-    </class>
 </classes>

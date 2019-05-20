@@ -83,14 +83,14 @@ public class ParseXMLUtils {
      * 由xml文件动态生成class
      *
      * @param xmlFile 用户上传的xml文件
-     * @return 是否编译成功
+     * @return java代码
      */
-    public static boolean xml2Class(File xmlFile) {
+    public static  Map<String, String> xml2Class(File xmlFile) {
         try {
             SAXReader saxReader = new SAXReader();
             Document document = saxReader.read(xmlFile);
             if (null == document) {
-                return false;
+                return null;
             }
             Element root = document.getRootElement();   // 根元素
             Map<String, String> classCode = new HashMap<>();    // 所有类源码
@@ -138,10 +138,10 @@ public class ParseXMLUtils {
             }
 
             // 编译
-            return ClassUtils.generateClass(classCode);
+            return classCode;
         } catch (Exception e) {
             log.error("xml to class error: " + e.getMessage());
-            return false;
+            return null;
         }
     }
 
