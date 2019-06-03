@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classes>
+    <class type="User" table="user">
+        <field type="String" entity="user" coloumn="name">name</field>
+        <field type="String" table="user" coloumn="username">username</field>
+        <field type="String" table="laptop" coloumn="mouse">mouse</field>
+        <list type="Laptop">laptop</list>
+        <map key="String" value="Pen">penMap</map>
+    </class>
+
+    <class type="Laptop">
+        <field type="String" table="laptop" coloumn="mouse">mouse</field>
+        <field type="Integer" table="laptop" coloumn="keyboard">keyboard</field>
+    </class>
+
+    <class type="Pen">
+        <field type="long" table="pen" coloumn="length">length</field>
+        <field type="double" table="double" coloumn="price">price</field>
+    </class>
+
+</classes>
