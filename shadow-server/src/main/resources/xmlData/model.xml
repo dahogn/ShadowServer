@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classes>
-    <class type="User" table="user">
-        <field type="String" entity="user" coloumn="name">name</field>
-        <field type="String" table="user" coloumn="username">username</field>
-        <field type="String" table="laptop" coloumn="mouse">mouse</field>
-        <list type="Laptop">laptop</list>
-        <map key="String" value="Pen">penMap</map>
+
+    <class name="Vending">
+        <id type="int" table="vending" column="id">id</id>
+        <field type="String" table="vending" column="name">name</field>
+        <list type="CargoRoad" table="cargo_road">cargoRoad</list>
     </class>
 
-    <class type="Laptop">
-        <field type="String" table="laptop" coloumn="mouse">mouse</field>
-        <field type="Integer" table="laptop" coloumn="keyboard">keyboard</field>
+    <class name="CargoRoad">
+        <id type="int" table="cargo_road" column="id">id</id>
+        <field type="Integer" table="cargo_road" column="serial">serial</field>
+        <list type="Commodity" table="re_road_commodity">commodity</list>
     </class>
 
-    <class type="Pen">
-        <field type="long" table="pen" coloumn="length">length</field>
-        <field type="double" table="double" coloumn="price">price</field>
+    <class name="Commodity">
+        <id type="int" table="commodity" column="id">id</id>
+        <field type="String" table="commodity" column="name">name</field>
+        <field type="double" table="commodity" column="price">price</field>
+        <field type="Integer" table="re_road_commodity" column="number">number</field>
     </class>
 
 </classes>

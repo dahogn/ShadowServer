@@ -1,5 +1,6 @@
 package com.runhang.shadow.server.common.utils;
 
+import com.runhang.shadow.server.core.model.DatabaseField;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
@@ -78,12 +79,12 @@ public class ParseXMLUtils {
     }
 
     /**
-     * 由xml文件动态生成class
+     * 由xml文件动态生成class代码
      *
      * @param xmlFile 用户上传的xml文件
      * @return java代码
      */
-    public static  Map<String, String> xml2Class(File xmlFile) {
+    public static Map<String, String> xml2ClassCode(File xmlFile) {
         try {
             SAXReader saxReader = new SAXReader();
             Document document = saxReader.read(xmlFile);
@@ -91,23 +92,39 @@ public class ParseXMLUtils {
                 return null;
             }
             Element root = document.getRootElement();   // 根元素
+
             Map<String, String> classCode = new HashMap<>();    // 所有类源码
-            // 遍历节点下元素
+            Map<String, DatabaseField> databaseFieldMap = new HashMap<>();  // 类属性与数据库字段映射关系
+
+            // 遍历节点下元素生成类代码
             for (Iterator<Element> itClass = root.elementIterator(); itClass.hasNext(); ) {
                 Element clazz = itClass.next();
-                String className = clazz.attribute("type").getValue();
+                String className = clazz.attribute("name").getValue();
                 Map<String, String> propertyMap = new HashMap<>();   // 类属性
-                // 遍历属性
+                // 遍历属性，记录属性名及类型，以及与数据库字段对应关系
                 for (Iterator<Element> itField = clazz.elementIterator(); itField.hasNext(); ) {
                     Element field = itField.next();
                     String attrName = field.getText();
                     switch (field.getName()) {
-                        // 普通属性
+                        // id和普通属性
+                        case "id":
                         case "field":
                             Attribute fieldAttrType = field.attribute("type");
                             if ( null != fieldAttrType) {
                                 propertyMap.put(attrName, fieldAttrType.getValue());
                             }
+                            // 数据库字段对应关系
+                            Attribute fieldAttrTable = field.attribute("table");
+                            Attribute fieldAttrColumn = field.attribute("column");
+                            String fieldTable = "";
+                            if (null != fieldAttrTable) {
+                                fieldTable = fieldAttrTable.getValue();
+                            }
+                            String fieldColumn = "";
+                            if (null != fieldAttrColumn) {
+                                fieldColumn = fieldAttrColumn.getValue();
+                            }
+                            databaseFieldMap.put(attrName, new DatabaseField(fieldTable, fieldColumn));
                             break;
 
                         // 列表属性
@@ -130,12 +147,13 @@ public class ParseXMLUtils {
                         default:
                             break;
                     }
-                    String sourceStr = ClassUtils.generateCode(className, propertyMap);
-                    classCode.put(className, sourceStr);
                 }
+                // 生成代码
+                String sourceStr = ClassUtils.generateCode(className, propertyMap, databaseFieldMap);
+                classCode.put(className, sourceStr);
             }
 
-            // 编译
+            // 返回源码
             return classCode;
         } catch (Exception e) {
             log.error("xml to class error: " + e.getMessage());

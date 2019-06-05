@@ -6,10 +6,31 @@
     </xs:simpleType>
 
     <!-- define class attribution -->
+    <xs:complexType name="idType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="type" type="stringType" use="required" />
+                <xs:attribute name="table" type="stringType" use="required" />
+                <xs:attribute name="column" type="stringType" use="required" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
     <xs:complexType name="attrType">
         <xs:simpleContent>
             <xs:extension base="xs:string">
                 <xs:attribute name="type" type="stringType" use="required" />
+                <xs:attribute name="table" type="stringType" use="required" />
+                <xs:attribute name="column" type="stringType" />
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="listType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="type" type="stringType" use="required" />
+                <xs:attribute name="table" type="stringType" use="required" />
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
@@ -26,11 +47,12 @@
     <!-- define class -->
     <xs:complexType name="classType">
         <xs:sequence>
+            <xs:element name="id" type="idType" />
             <xs:element name="field" type="attrType" minOccurs="0" maxOccurs="unbounded" />
-            <xs:element name="list" type="attrType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="list" type="listType" minOccurs="0" maxOccurs="unbounded" />
             <xs:element name="map" type="mapType" minOccurs="0" maxOccurs="unbounded" />
         </xs:sequence>
-        <xs:attribute name="type" type="stringType" use="required" />
+        <xs:attribute name="name" type="stringType" use="required" />
     </xs:complexType>
 
     <!-- define class list -->

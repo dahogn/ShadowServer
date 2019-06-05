@@ -1,5 +1,6 @@
 package com.runhang.shadow.server.common.utils;
 
+import com.runhang.shadow.server.core.model.DatabaseField;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
@@ -27,32 +28,51 @@ public class ClassUtils {
     private static final String METHOD_SETTER = "set";
 
     private static final String CLASS_FILE_PATH = "target/classes";    // 编译生成的class文件路径
-    private static final String JAVA_FILE_PATH = "src/main/java/com/runhang/shadow/demo/device/entity/";    // java文件路径
-    public static final String ENTITY_PACKAGE_NAME = "com.runhang.shadow.demo.device.entity";  // 动态类的包名
-    public static final String INTERFACE_PACKAGE_NAME = "com.runhang.shadow.demo.device.mapper";
+    private static final String JAVA_FILE_PATH = "src/main/java/com/runhang/shadow/server/device/entity/";    // java文件路径
+    public static final String ENTITY_PACKAGE_NAME = "com.runhang.shadow.server.device.entity";  // 动态类的包名
 
     /**
      * 由属性及数据类型键值对生成java代码
      *
      * @param className 类名
      * @param propertyMap 属性定义
+     * @param databaseFieldMap 数据库字段映射
      * @return java代码
      */
-    public static String generateCode(String className, Map<String, String> propertyMap) {
-        String codeStr = "package " + ENTITY_PACKAGE_NAME + ";\n" +  // 包
-                "import java.util.List;\nimport java.util.Map;\n" +    // 导包
-                "public class " + className + "{\n";
+    public static String generateCode(String className, Map<String, String> propertyMap, Map<String, DatabaseField> databaseFieldMap) {
+        StringBuilder codeStr =
+                new StringBuilder(
+                        "package " + ENTITY_PACKAGE_NAME + ";\n" +  // 包
+                        "import java.util.*;\nimport com.runhang.shadow.server.core.model.DatabaseField;\n" +    // 导包
+                        "public class " + className + "{\n\n" +
+                        "public static Map<String, DatabaseField> databaseFieldMap;\n");
+
+        // 数据库字段初始化静态代码
+        codeStr.append("static {\ndatabaseFieldMap = new HashMap<>();\n");
+        for (String field : databaseFieldMap.keySet()) {
+            DatabaseField databaseField = databaseFieldMap.get(field);
+            codeStr.append(String.format(
+                    "databaseFieldMap.put(\"%s\", new DatabaseField(\"%s\", \"%s\"));\n",
+                    field, databaseField.getTable(), databaseField.getColumn()));
+        }
+        codeStr.append("}\n\n");
+
+        // getter & setter
         for (Map.Entry<String, String> entry : propertyMap.entrySet()) {
             String field = entry.getKey();
             String type = entry.getValue();
-            codeStr += "private " + type + " " + field + ";\n";   // 属性
-            codeStr += "public void " + getGetterSetterName(field, METHOD_SETTER) + "(Object " + field + ") {\n";// setter
-            codeStr += "this." + field + " = (" + type + ") " + field + "; \n}\n";
-            codeStr += "public " + type + " " + getGetterSetterName(field, METHOD_GETTER) + "() {\n";   // getter
-            codeStr += "return " + field + "; \n}\n";
+            codeStr.append(String.format(
+                    "private %s %s;\n" +
+                    "public void %s(%s %s) { this.%s = %s; }\n" +
+                    "public %s %s() { return %s; }\n\n",
+                    type, field,
+                    getGetterSetterName(field, METHOD_SETTER), type, field, field, field,
+                    type, getGetterSetterName(field, METHOD_GETTER), field)
+            );
         }
-        codeStr += "}";
-        return codeStr;
+
+        codeStr.append("}");
+        return codeStr.toString();
     }
 
     public static String generateInterface(String className, Map<String, String> propertyMap) {

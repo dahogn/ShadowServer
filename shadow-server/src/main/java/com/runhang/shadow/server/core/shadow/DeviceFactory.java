@@ -1,7 +1,7 @@
 package com.runhang.shadow.server.core.shadow;
 
-import com.runhang.shadow.demo.common.utils.ClassUtils;
-import com.runhang.shadow.demo.common.utils.ParseXMLUtils;
+import com.runhang.shadow.server.common.utils.ClassUtils;
+import com.runhang.shadow.server.common.utils.ParseXMLUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -21,7 +21,7 @@ public class DeviceFactory {
         File xsdFile = new File("src/main/resources/xmlData/model.xsd");
         boolean validateSuccess = ParseXMLUtils.domValidate(xmlFile, xsdFile);
         if (validateSuccess) {
-            Map<String, String> code = ParseXMLUtils.xml2Class(xmlFile);
+            Map<String, String> code = ParseXMLUtils.xml2ClassCode(xmlFile);
             if (null != code) {
                 boolean success = ClassUtils.generateClass(code);
                 log.info("generate classes: " + success);
