@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classes>
 
-    <class name="Vending">
+    <class name="Vending" device="true">
         <id type="int" table="vending" column="id">id</id>
         <field type="String" table="vending" column="name">name</field>
         <list type="CargoRoad" table="cargo_road">cargoRoad</list>

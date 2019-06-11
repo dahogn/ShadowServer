@@ -28,7 +28,8 @@ public class ClassUtils {
     private static final String METHOD_SETTER = "set";
 
     private static final String CLASS_FILE_PATH = "target/classes";    // 编译生成的class文件路径
-    private static final String JAVA_FILE_PATH = "src/main/java/com/runhang/shadow/server/device/entity/";    // java文件路径
+    private static final String JAVA_FILE_PATH = "src/main/java/com/runhang/shadow/server/device/entity/";    // java实体类文件路径
+    private static final String REPOSITORY_FILE_PATH = "src/main/java/com/runhang/shadow/server/device/repository/";  // 数据库管理文件路径
     public static final String ENTITY_PACKAGE_NAME = "com.runhang.shadow.server.device.entity";  // 动态类的包名
 
     /**
@@ -39,12 +40,17 @@ public class ClassUtils {
      * @param databaseFieldMap 数据库字段映射
      * @return java代码
      */
-    public static String generateCode(String className, Map<String, String> propertyMap, Map<String, DatabaseField> databaseFieldMap) {
+    public static String generateEntityCode(String className, Map<String, String> propertyMap, Map<String, DatabaseField> databaseFieldMap) {
         StringBuilder codeStr =
                 new StringBuilder(
                         "package " + ENTITY_PACKAGE_NAME + ";\n" +  // 包
-                        "import java.util.*;\nimport com.runhang.shadow.server.core.model.DatabaseField;\n" +    // 导包
-                        "public class " + className + "{\n\n" +
+                        "import java.util.*;\n" +
+                        "import javax.persistence.*;\n" +
+                        "import com.runhang.shadow.server.core.model.DatabaseField;\n" +
+                        "import com.runhang.shadow.server.core.databaseSync.ShadowSubject;\n\n" +    // 导包
+                        "@Entity\n" +
+                        "public class " + className + " extends ShadowSubject {\n\n" +
+                        "@Transient\n" +
                         "public static Map<String, DatabaseField> databaseFieldMap;\n");
 
         // 数据库字段初始化静态代码
@@ -57,10 +63,21 @@ public class ClassUtils {
         }
         codeStr.append("}\n\n");
 
-        // getter & setter
+        codeStr.append(
+                "@Id\n@GeneratedValue\n" +
+                "private int id;\n" +
+                "public void setId(int id) { this.id = id; }\n" +
+                "public int getId() { return id; }\n");
+
+        // 属性 & getter & setter
         for (Map.Entry<String, String> entry : propertyMap.entrySet()) {
             String field = entry.getKey();
             String type = entry.getValue();
+            // list属性增加表的关联映射
+            if (type.startsWith("List")) {
+                codeStr.append("@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)\n");
+                codeStr.append(String.format("@JoinColumn(name = \"%s\")\n", DatabaseUtils.generateForginKey(field)));
+            }
             codeStr.append(String.format(
                     "private %s %s;\n" +
                     "public void %s(%s %s) { this.%s = %s; }\n" +
@@ -75,7 +92,7 @@ public class ClassUtils {
         return codeStr.toString();
     }
 
-    public static String generateInterface(String className, Map<String, String> propertyMap) {
+    public static String generateRepositoryCode(String className, Map<String, String> propertyMap) {
         String codeStr = "package " + ENTITY_PACKAGE_NAME + ";\n" +  // 包
                 "import java.util.List;\nimport java.util.Map;\n" +    // 导包
                 "public interface " + className + "{\n";

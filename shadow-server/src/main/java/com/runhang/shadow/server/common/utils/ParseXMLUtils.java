@@ -19,9 +19,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @ClassName ParseXMLUtils
@@ -94,62 +92,29 @@ public class ParseXMLUtils {
             Element root = document.getRootElement();   // 根元素
 
             Map<String, String> classCode = new HashMap<>();    // 所有类源码
-            Map<String, DatabaseField> databaseFieldMap = new HashMap<>();  // 类属性与数据库字段映射关系
+            // TODO 把设备对象加入初始化管理中
+            List<String> deviceName = new ArrayList<>();    // 使用影子平台管理的设备类
 
             // 遍历节点下元素生成类代码
             for (Iterator<Element> itClass = root.elementIterator(); itClass.hasNext(); ) {
                 Element clazz = itClass.next();
                 String className = clazz.attribute("name").getValue();
+                String isDevice = clazz.attribute("device").getValue();
+                if ("true".equals(isDevice)) {
+                    deviceName.add(className);
+                }
+
                 Map<String, String> propertyMap = new HashMap<>();   // 类属性
+                Map<String, DatabaseField> databaseFieldMap = new HashMap<>();  // 类属性与数据库字段映射关系
+
                 // 遍历属性，记录属性名及类型，以及与数据库字段对应关系
                 for (Iterator<Element> itField = clazz.elementIterator(); itField.hasNext(); ) {
                     Element field = itField.next();
                     String attrName = field.getText();
-                    switch (field.getName()) {
-                        // id和普通属性
-                        case "id":
-                        case "field":
-                            Attribute fieldAttrType = field.attribute("type");
-                            if ( null != fieldAttrType) {
-                                propertyMap.put(attrName, fieldAttrType.getValue());
-                            }
-                            // 数据库字段对应关系
-                            Attribute fieldAttrTable = field.attribute("table");
-                            Attribute fieldAttrColumn = field.attribute("column");
-                            String fieldTable = "";
-                            if (null != fieldAttrTable) {
-                                fieldTable = fieldAttrTable.getValue();
-                            }
-                            String fieldColumn = "";
-                            if (null != fieldAttrColumn) {
-                                fieldColumn = fieldAttrColumn.getValue();
-                            }
-                            databaseFieldMap.put(attrName, new DatabaseField(fieldTable, fieldColumn));
-                            break;
-
-                        // 列表属性
-                        case "list":
-                            Attribute listAttrType = field.attribute("type");
-                            if (null != listAttrType) {
-                                propertyMap.put(attrName, "List<" + listAttrType.getValue() + ">");
-                            }
-                            break;
-
-                        // map属性
-                        case "map":
-                            Attribute mapAttrKey = field.attribute("key");
-                            Attribute mapAttrValue = field.attribute("value");
-                            if (null != mapAttrKey && null != mapAttrValue) {
-                                propertyMap.put(attrName, "Map<" + mapAttrKey.getValue() + ", " + mapAttrValue.getValue() + ">");
-                            }
-                            break;
-
-                        default:
-                            break;
-                    }
+                    dealClassAttribute(attrName, field, databaseFieldMap, propertyMap);
                 }
                 // 生成代码
-                String sourceStr = ClassUtils.generateCode(className, propertyMap, databaseFieldMap);
+                String sourceStr = ClassUtils.generateEntityCode(className, propertyMap, databaseFieldMap);
                 classCode.put(className, sourceStr);
             }
 
@@ -158,6 +123,77 @@ public class ParseXMLUtils {
         } catch (Exception e) {
             log.error("xml to class error: " + e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * @Description 解析类属性
+     * @param attrName 属性名
+     * @param field xml节点
+     * @param databaseFieldMap 数据库字段对应关系
+     * @param propertyMap 类属性
+     * @author szh
+     * @Date 2019/6/11 18:37
+     */
+    private static void dealClassAttribute(String attrName,
+                                    Element field,
+                                    Map<String, DatabaseField> databaseFieldMap,
+                                    Map<String, String> propertyMap) {
+        switch (field.getName()) {
+            // id
+            case "id":
+                Attribute idAttrTable = field.attribute("table");
+                Attribute idAttrColumn = field.attribute("column");
+                String idTable = "";
+                if (null != idAttrTable) {
+                    idTable = idAttrTable.getValue();
+                }
+                String idColumn = "";
+                if (null != idAttrColumn) {
+                    idColumn = idAttrColumn.getValue();
+                }
+                databaseFieldMap.put("id", new DatabaseField(idTable, idColumn));
+                break;
+
+            // 普通属性
+            case "field":
+                Attribute fieldAttrType = field.attribute("type");
+                if ( null != fieldAttrType) {
+                    propertyMap.put(attrName, fieldAttrType.getValue());
+                }
+                // 数据库字段对应关系
+                Attribute fieldAttrTable = field.attribute("table");
+                Attribute fieldAttrColumn = field.attribute("column");
+                String fieldTable = "";
+                if (null != fieldAttrTable) {
+                    fieldTable = fieldAttrTable.getValue();
+                }
+                String fieldColumn = "";
+                if (null != fieldAttrColumn) {
+                    fieldColumn = fieldAttrColumn.getValue();
+                }
+                databaseFieldMap.put(attrName, new DatabaseField(fieldTable, fieldColumn));
+                break;
+
+            // 列表属性
+            case "list":
+                Attribute listAttrType = field.attribute("type");
+                if (null != listAttrType) {
+                    propertyMap.put(attrName, "List<" + listAttrType.getValue() + ">");
+                }
+                break;
+
+            // map属性
+            case "map":
+                Attribute mapAttrKey = field.attribute("key");
+                Attribute mapAttrValue = field.attribute("value");
+                if (null != mapAttrKey && null != mapAttrValue) {
+                    propertyMap.put(attrName, "Map<" + mapAttrKey.getValue() + ", " + mapAttrValue.getValue() + ">");
+                }
+                break;
+
+            default:
+                break;
         }
     }
 
