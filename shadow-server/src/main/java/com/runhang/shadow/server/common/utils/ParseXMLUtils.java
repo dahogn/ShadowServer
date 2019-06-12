@@ -99,8 +99,8 @@ public class ParseXMLUtils {
             for (Iterator<Element> itClass = root.elementIterator(); itClass.hasNext(); ) {
                 Element clazz = itClass.next();
                 String className = clazz.attribute("name").getValue();
-                String isDevice = clazz.attribute("device").getValue();
-                if ("true".equals(isDevice)) {
+                Attribute isDevice = clazz.attribute("device");
+                if (null != isDevice && "true".equals(isDevice.getValue())) {
                     deviceName.add(className);
                 }
 
@@ -116,11 +116,14 @@ public class ParseXMLUtils {
                 // 生成代码
                 String sourceStr = ClassUtils.generateEntityCode(className, propertyMap, databaseFieldMap);
                 classCode.put(className, sourceStr);
+                String repositoryStr = ClassUtils.generateRepositoryCode(className);
+                classCode.put(DatabaseUtils.generateRepositoryName(className), repositoryStr);
             }
 
             // 返回源码
             return classCode;
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("xml to class error: " + e.getMessage());
             return null;
         }

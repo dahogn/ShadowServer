@@ -27,10 +27,21 @@ public class ClassUtils {
     private static final String METHOD_GETTER = "get";
     private static final String METHOD_SETTER = "set";
 
-    private static final String CLASS_FILE_PATH = "target/classes";    // 编译生成的class文件路径
-    private static final String JAVA_FILE_PATH = "src/main/java/com/runhang/shadow/server/device/entity/";    // java实体类文件路径
-    private static final String REPOSITORY_FILE_PATH = "src/main/java/com/runhang/shadow/server/device/repository/";  // 数据库管理文件路径
-    public static final String ENTITY_PACKAGE_NAME = "com.runhang.shadow.server.device.entity";  // 动态类的包名
+    // 编译生成的class文件路径
+    private static final String CLASS_FILE_PATH = "target/classes";
+
+    private static final String DEVICE_JAVA_FILE_PATH = "src/main/java/com/runhang/shadow/server/device/";
+    private static final String MAIN_PACKAGE_NAME = "com.runhang.shadow.server.";
+
+    // java实体类文件路径
+    private static final String ENTITY_FILE_PATH = DEVICE_JAVA_FILE_PATH + "entity/";
+    // 数据库管理文件路径
+    private static final String REPOSITORY_FILE_PATH = DEVICE_JAVA_FILE_PATH + "repository/";
+
+    // 动态类的包名
+    private static final String ENTITY_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.entity";
+    // 数据库映射包名
+    private static final String REPOSITORY_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.repository";
 
     /**
      * 由属性及数据类型键值对生成java代码
@@ -43,11 +54,11 @@ public class ClassUtils {
     public static String generateEntityCode(String className, Map<String, String> propertyMap, Map<String, DatabaseField> databaseFieldMap) {
         StringBuilder codeStr =
                 new StringBuilder(
-                        "package " + ENTITY_PACKAGE_NAME + ";\n" +  // 包
+                        "package " + ENTITY_PACKAGE_NAME + ";\n\n" +  // 包
                         "import java.util.*;\n" +
                         "import javax.persistence.*;\n" +
-                        "import com.runhang.shadow.server.core.model.DatabaseField;\n" +
-                        "import com.runhang.shadow.server.core.databaseSync.ShadowSubject;\n\n" +    // 导包
+                        "import " + MAIN_PACKAGE_NAME + "core.model.DatabaseField;\n" +
+                        "import " + MAIN_PACKAGE_NAME + "core.databaseSync.ShadowSubject;\n\n" +    // 导包
                         "@Entity\n" +
                         "public class " + className + " extends ShadowSubject {\n\n" +
                         "@Transient\n" +
@@ -76,7 +87,7 @@ public class ClassUtils {
             // list属性增加表的关联映射
             if (type.startsWith("List")) {
                 codeStr.append("@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)\n");
-                codeStr.append(String.format("@JoinColumn(name = \"%s\")\n", DatabaseUtils.generateForginKey(field)));
+                codeStr.append(String.format("@JoinColumn(name = \"%s\")\n", DatabaseUtils.generateForeignKey(field)));
             }
             codeStr.append(String.format(
                     "private %s %s;\n" +
@@ -92,14 +103,19 @@ public class ClassUtils {
         return codeStr.toString();
     }
 
-    public static String generateRepositoryCode(String className, Map<String, String> propertyMap) {
-        String codeStr = "package " + ENTITY_PACKAGE_NAME + ";\n" +  // 包
-                "import java.util.List;\nimport java.util.Map;\n" +    // 导包
-                "public interface " + className + "{\n";
-        for (String field : propertyMap.keySet()) {
-            String type = propertyMap.get(field);
-        }
-        return "";
+    /**
+     * @Description 生成数据库操作接口
+     * @param className 对应的实体类名
+     * @return 代码
+     * @author szh
+     * @Date 2019/6/12 9:59
+     */
+    public static String generateRepositoryCode(String className) {
+        String codeStr = "package " + REPOSITORY_PACKAGE_NAME + ";\n\n" +  // 包
+                "import " + MAIN_PACKAGE_NAME + "device.entity.*;\n" +
+                "import org.springframework.data.jpa.repository.JpaRepository;\n\n" +    // 导包
+                "public interface " + DatabaseUtils.generateRepositoryName(className) + " extends JpaRepository<Vending, Integer> {\n}";
+        return codeStr;
     }
 
     /**
@@ -113,7 +129,7 @@ public class ClassUtils {
 
         try {
             // 创建java文件并写入代码
-//            File javaFile = new File(JAVA_FILE_PATH + className + ".java");
+//            File javaFile = new File(ENTITY_FILE_PATH + className + ".java");
 //            if (!javaFile.exists()) {
 //                javaFile.getParentFile().mkdirs();
 //                javaFile.createNewFile();
@@ -148,12 +164,17 @@ public class ClassUtils {
      * @param classCode 类名及代码
      * @return
      */
-    public static boolean generateClass(Map<String, String> classCode) {
+    public static boolean compileCode(Map<String, String> classCode) {
         List<JavaFileObject> fileObjectList = new ArrayList<>();    // 要编译的单元
         for (Map.Entry<String, String> entry : classCode.entrySet()) {
             try {
                 // 创建java文件并写入代码
-                File javaFile = new File(JAVA_FILE_PATH + entry.getKey() + ".java");
+                File javaFile;
+                if (DatabaseUtils.isRepository(entry.getKey())) {
+                    javaFile = new File(REPOSITORY_FILE_PATH + entry.getKey() + ".java");
+                } else {
+                    javaFile = new File(ENTITY_FILE_PATH + entry.getKey() + ".java");
+                }
                 if (!javaFile.exists()) {
                     javaFile.getParentFile().mkdirs();
                     javaFile.createNewFile();
@@ -193,7 +214,12 @@ public class ClassUtils {
      */
     private static void deleteJavaFiles(Set<String> fileName) {
         for (String name : fileName) {
-            File javaFile = new File(JAVA_FILE_PATH + name + ".java");
+            File javaFile;
+            if (DatabaseUtils.isRepository(name)) {
+                javaFile = new File(REPOSITORY_FILE_PATH + name + ".java");
+            } else {
+                javaFile = new File(ENTITY_FILE_PATH + name + ".java");
+            }
             FileUtils.deleteQuietly(javaFile);
         }
     }
@@ -218,48 +244,6 @@ public class ClassUtils {
      */
     public static String getClassFullName(String className) {
         return ENTITY_PACKAGE_NAME + "." + className;
-    }
-
-    /**
-     * 设置bean的属性值
-     *
-     * @param obj       bean对象
-     * @param fieldName 属性名
-     * @param value     属性值
-     * @return          是否成功
-     */
-    public static boolean setValue(Object obj, String fieldName, Object value) {
-        Class clazz = obj.getClass();
-        try {
-            Field field = clazz.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            field.set(obj, value);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 获取bean的属性值
-     *
-     * @param obj       bean对象
-     * @param fieldName 属性名称
-     * @return          属性值
-     */
-    public static Object getValue(Object obj, String fieldName) {
-        Class clazz = obj.getClass();
-        String methodName = getGetterSetterName(fieldName, METHOD_GETTER);
-        Object returnValue;
-        try {
-            Method method = clazz.getMethod(methodName);
-            returnValue = method.invoke(obj);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        return returnValue;
     }
 
 }

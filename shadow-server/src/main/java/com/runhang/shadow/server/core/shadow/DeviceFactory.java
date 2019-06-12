@@ -23,7 +23,7 @@ public class DeviceFactory {
         if (validateSuccess) {
             Map<String, String> code = ParseXMLUtils.xml2ClassCode(xmlFile);
             if (null != code) {
-                boolean success = ClassUtils.generateClass(code);
+                boolean success = ClassUtils.compileCode(code);
                 log.info("generate classes: " + success);
             } else {
                 log.error("generate code failed");
