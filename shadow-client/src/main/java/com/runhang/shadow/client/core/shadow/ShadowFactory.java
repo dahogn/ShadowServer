@@ -2,8 +2,6 @@ package com.runhang.shadow.client.core.shadow;
 
 import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.core.bean.ShadowBean;
-import com.runhang.shadow.client.core.bean.ShadowDoc;
-import com.runhang.shadow.client.core.bean.ShadowDocState;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 import com.runhang.shadow.client.core.mqtt.TopicUtils;
@@ -44,7 +42,7 @@ public class ShadowFactory {
             return false;
         }
         /** 2. bean注入 **/
-        String beanName = System.currentTimeMillis() + bean.getData().getClass().getSimpleName();
+        String beanName = bean.getData().getClass().getSimpleName() + "_" + topic;
         beanMap.put(topic, beanName);
         BeanUtils.injectExistBean(bean, beanName);
         /** 3. mqtt订阅 **/
@@ -72,15 +70,9 @@ public class ShadowFactory {
             /** 1. 实例化device对象 **/
             Class shadowClass = Class.forName(className);
             Object shadow = shadowClass.newInstance();
-            ShadowBean shadowBean = new ShadowBean();
-            ShadowDoc doc = new ShadowDoc();
-            doc.setState(new ShadowDocState());
-            shadowBean.setDoc(doc);
-            shadowBean.setData(shadow);
-            shadowBean.setTopic(topic);
 
             /** 2. bean注入 **/
-            return injectShadow(shadowBean);
+            return injectShadow(shadow, topic);
 
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             log.error("injectShadow failed: " + e.getMessage());
@@ -102,13 +94,27 @@ public class ShadowFactory {
             return false;
         }
         ShadowBean shadowBean = new ShadowBean();
-        ShadowDoc doc = new ShadowDoc();
-        doc.setState(new ShadowDocState());
-        shadowBean.setDoc(doc);
         shadowBean.setData(data);
         shadowBean.setTopic(topic);
 
         return injectShadow(shadowBean);
+    }
+
+    /**
+     * @Description 批量注入影子
+     * @param dataMap 影子与主题
+     * @return 是否成功
+     * @author szh
+     * @Date 2019/6/13 14:45
+     */
+    public static boolean batchInjectShadow(Map<String, Object> dataMap) {
+        for (String topic : dataMap.keySet()) {
+            boolean success = injectShadow(dataMap.get(topic), topic);
+            if (!success) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

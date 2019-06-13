@@ -29,6 +29,12 @@ public class ShadowBean<T> {
     /** 影子文档 **/
     private ShadowDoc doc;
 
+    public ShadowBean() {
+        ShadowDoc doc = new ShadowDoc();
+        doc.setState(new ShadowDocState());
+        setDoc(doc);
+    }
+
     public String getTopic() {
         return topic;
     }
@@ -38,8 +44,6 @@ public class ShadowBean<T> {
     }
 
     public T getData() {
-        rwLock.readLock().lock();
-        rwLock.readLock().unlock();
         return data;
     }
 

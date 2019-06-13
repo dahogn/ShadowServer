@@ -118,7 +118,8 @@ public class ClassUtils {
         String codeStr = "package " + REPOSITORY_PACKAGE_NAME + ";\n\n" +  // 包
                 "import " + MAIN_PACKAGE_NAME + "device.entity.*;\n" +
                 "import org.springframework.data.jpa.repository.JpaRepository;\n\n" +    // 导包
-                "public interface " + DatabaseUtils.generateRepositoryName(className) + " extends JpaRepository<Vending, Integer> {\n}";
+                "public interface " + DatabaseUtils.generateRepositoryName(className) +
+                " extends JpaRepository<" + className + ", Integer> {\n}";
         return codeStr;
     }
 

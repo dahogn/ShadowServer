@@ -1,8 +1,16 @@
 package com.runhang.shadow.client.device.init;
 
+import com.runhang.shadow.client.core.shadow.ShadowFactory;
+import com.runhang.shadow.client.device.entity.Vending;
+import com.runhang.shadow.client.device.repository.VendingRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName ShadowInit
@@ -16,12 +24,18 @@ public class ShadowInit implements CommandLineRunner {
     @Value("${shadow.auto-init}")
     private boolean autoInit;
 
-    private String[] deviceList = {"Vending"};
+    @Autowired
+    private VendingRepository vendingRepository;
 
     @Override
     public void run(String... args) throws Exception {
         if (autoInit) {
-
+            Map<String, Object> dataMap = new HashMap<>();
+            List<Vending> vendingList = vendingRepository.findAll();
+            for (Vending v : vendingList) {
+                dataMap.put(v.getTopic(), v);
+            }
+            ShadowFactory.batchInjectShadow(dataMap);
         }
     }
 }
