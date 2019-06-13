@@ -2,10 +2,10 @@ package com.runhang.shadow.server.core.shadow;
 
 import com.runhang.shadow.server.common.utils.ClassUtils;
 import com.runhang.shadow.server.common.utils.ParseXMLUtils;
+import com.runhang.shadow.server.core.model.ShadowCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.util.Map;
 
 /**
  * @ClassName DeviceFactory
@@ -20,10 +20,13 @@ public class DeviceFactory {
         File xmlFile = new File("src/main/resources/xmlData/model.xml");
         File xsdFile = new File("src/main/resources/xmlData/model.xsd");
         boolean validateSuccess = ParseXMLUtils.domValidate(xmlFile, xsdFile);
+        boolean success = false;
         if (validateSuccess) {
-            Map<String, String> code = ParseXMLUtils.xml2ClassCode(xmlFile);
+            ShadowCode code = ParseXMLUtils.xml2ClassCode(xmlFile);
             if (null != code) {
-                boolean success = ClassUtils.compileCode(code);
+                success = ClassUtils.compileCode(code.getEntityCode(), ClassUtils.ENTITY_FILE_PATH);
+                success = ClassUtils.compileCode(code.getRepositoryCode(), ClassUtils.REPOSITORY_FILE_PATH);
+                success = ClassUtils.compileCode(code.getInitCode(), ClassUtils.INIT_FILE_PATH);
                 log.info("generate classes: " + success);
             } else {
                 log.error("generate code failed");

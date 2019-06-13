@@ -34,14 +34,18 @@ public class ClassUtils {
     private static final String MAIN_PACKAGE_NAME = "com.runhang.shadow.server.";
 
     // java实体类文件路径
-    private static final String ENTITY_FILE_PATH = DEVICE_JAVA_FILE_PATH + "entity/";
+    public static final String ENTITY_FILE_PATH = DEVICE_JAVA_FILE_PATH + "entity/";
     // 数据库管理文件路径
-    private static final String REPOSITORY_FILE_PATH = DEVICE_JAVA_FILE_PATH + "repository/";
+    public static final String REPOSITORY_FILE_PATH = DEVICE_JAVA_FILE_PATH + "repository/";
+    // 初始化类文件路径
+    public static final String INIT_FILE_PATH = DEVICE_JAVA_FILE_PATH + "init/";
 
     // 动态类的包名
     private static final String ENTITY_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.entity";
     // 数据库映射包名
     private static final String REPOSITORY_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.repository";
+    // 初始化类包名
+    private static final String INIT_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.init";
 
     /**
      * 由属性及数据类型键值对生成java代码
@@ -78,7 +82,7 @@ public class ClassUtils {
                 "@Id\n@GeneratedValue\n" +
                 "private int id;\n" +
                 "public void setId(int id) { this.id = id; }\n" +
-                "public int getId() { return id; }\n");
+                "public int getId() { return id; }\n\n");
 
         // 属性 & getter & setter
         for (Map.Entry<String, String> entry : propertyMap.entrySet()) {
@@ -116,6 +120,35 @@ public class ClassUtils {
                 "import org.springframework.data.jpa.repository.JpaRepository;\n\n" +    // 导包
                 "public interface " + DatabaseUtils.generateRepositoryName(className) + " extends JpaRepository<Vending, Integer> {\n}";
         return codeStr;
+    }
+
+    /**
+     * @Description 生成设备信息初始化代码
+     * @param classList 设备名列表
+     * @return 代码
+     * @author szh
+     * @Date 2019/6/12 20:50
+     */
+    public static String generateInitCode(List<String> classList) {
+        StringBuilder entitySb = new StringBuilder();
+        for (String className : classList) {
+            entitySb.append("\"").append(ENTITY_PACKAGE_NAME).append(".").append(className).append("\",");
+        }
+        String entityList = entitySb.deleteCharAt(entitySb.length() - 1).toString();
+
+        return "package " + INIT_PACKAGE_NAME + ";\n\n" +
+                "import org.springframework.beans.factory.annotation.Value;\n" +    // 包
+                "import org.springframework.boot.CommandLineRunner;\n" +
+                "import org.springframework.stereotype.Component;\n\n" +
+                "@Component\npublic class ShadowInit implements CommandLineRunner {\n" +
+                "@Value(\"${shadow.auto-init}\")\nprivate boolean autoInit;\n\n" +  // 是否自动加载
+                "private String[] deviceList = {" + entityList + "};\n\n" +
+                "@Override\npublic void run(String... args) throws Exception {\n" +
+                "if (autoInit) {\n" +
+                "======================= code ============================" +
+                "}\n" +
+                "}\n" +
+                "}\n";
     }
 
     /**
@@ -164,17 +197,12 @@ public class ClassUtils {
      * @param classCode 类名及代码
      * @return
      */
-    public static boolean compileCode(Map<String, String> classCode) {
+    public static boolean compileCode(Map<String, String> classCode, String filePath) {
         List<JavaFileObject> fileObjectList = new ArrayList<>();    // 要编译的单元
         for (Map.Entry<String, String> entry : classCode.entrySet()) {
             try {
                 // 创建java文件并写入代码
-                File javaFile;
-                if (DatabaseUtils.isRepository(entry.getKey())) {
-                    javaFile = new File(REPOSITORY_FILE_PATH + entry.getKey() + ".java");
-                } else {
-                    javaFile = new File(ENTITY_FILE_PATH + entry.getKey() + ".java");
-                }
+                File javaFile = new File(filePath + entry.getKey() + ".java");
                 if (!javaFile.exists()) {
                     javaFile.getParentFile().mkdirs();
                     javaFile.createNewFile();
@@ -201,7 +229,7 @@ public class ClassUtils {
         boolean compileResult = task.call();
         if (!compileResult) {
             // 编译失败删除java文件
-            deleteJavaFiles(classCode.keySet());
+            deleteJavaFiles(classCode.keySet(), filePath);
         }
         return compileResult;
     }
@@ -209,17 +237,13 @@ public class ClassUtils {
     /**
      * @Description 删除生成的java文件
      * @param fileName 文件名
+     * @param filePath 文件路径
      * @author szh
      * @Date 2019/5/20 9:38
      */
-    private static void deleteJavaFiles(Set<String> fileName) {
+    private static void deleteJavaFiles(Set<String> fileName, String filePath) {
         for (String name : fileName) {
-            File javaFile;
-            if (DatabaseUtils.isRepository(name)) {
-                javaFile = new File(REPOSITORY_FILE_PATH + name + ".java");
-            } else {
-                javaFile = new File(ENTITY_FILE_PATH + name + ".java");
-            }
+            File javaFile = new File(filePath + name + ".java");
             FileUtils.deleteQuietly(javaFile);
         }
     }
