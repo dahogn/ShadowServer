@@ -6,12 +6,15 @@ import com.runhang.shadow.client.core.enums.ReErrorCode;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 import com.runhang.shadow.client.core.mqtt.TopicUtils;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
+import com.runhang.shadow.client.device.entity.ShadowEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @ClassName ShadowFactory
@@ -23,7 +26,14 @@ import java.util.Map;
 public class ShadowFactory {
 
     private static Logger log = LoggerFactory.getLogger(ShadowFactory.class);
+    /**
+     * 保存影子topic与容器id关系
+     */
     private static Map<String, String> beanMap = new HashMap<>();
+    /**
+     * 保存实体的SRI
+     */
+    private static Set<String> entitySriSet = new HashSet<>();
 
     private static ControlPush controlPush = new ControlPush();
 
@@ -93,7 +103,7 @@ public class ShadowFactory {
         if (beanMap.containsKey(topic)) {
             return false;
         }
-        ShadowBean shadowBean = new ShadowBean();
+        ShadowBean<Object> shadowBean = new ShadowBean<>();
         shadowBean.setData(data);
         shadowBean.setTopic(topic);
 
@@ -195,6 +205,23 @@ public class ShadowFactory {
         long current = shadowBean.getDoc().getTimestamp();
         controlPush.push(topic, shadowBean.getDoc(), current);
         return null;
+    }
+
+    /**
+     * @Description 注入影子的各个部分
+     * @param shadowEntity 影子部分实体
+     * @return 是否成功
+     * @author szh
+     * @Date 2019/6/16 19:51
+     */
+    public static boolean injectEntity(ShadowEntity shadowEntity) {
+        String sri = shadowEntity.getSRI();
+        if (entitySriSet.contains(sri)) {
+            return false;
+        }
+        entitySriSet.add(sri);
+        BeanUtils.injectExistBean(shadowEntity, sri);
+        return true;
     }
 
 }

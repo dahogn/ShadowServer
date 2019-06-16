@@ -1,6 +1,5 @@
 package com.runhang.shadow.client.device.entity;
 
-import com.runhang.shadow.client.core.databaseSync.ShadowSubject;
 import com.runhang.shadow.client.core.model.DatabaseField;
 
 import javax.persistence.Entity;
@@ -11,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-public class Commodity extends ShadowSubject {
+public class Commodity extends ShadowEntity {
 
 @Transient
 public static Map<String, DatabaseField> databaseFieldMap;
@@ -23,11 +22,6 @@ databaseFieldMap.put("name", new DatabaseField("commodity", "name"));
 databaseFieldMap.put("id", new DatabaseField("commodity", "id"));
 }
 
-@Id
-@GeneratedValue
-private int id;
-public void setId(int id) { this.id = id; }
-public int getId() { return id; }
 private Integer number;
 public void setNumber(Integer number) { this.number = number; }
 public Integer getNumber() { return number; }

@@ -3,6 +3,7 @@ package com.runhang.shadow.client.device.init;
 import com.runhang.shadow.client.core.shadow.ShadowFactory;
 import com.runhang.shadow.client.device.entity.Vending;
 import com.runhang.shadow.client.device.repository.VendingRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -19,6 +20,7 @@ import java.util.Map;
  * @author szh
  **/
 @Component
+@Slf4j
 public class ShadowInit implements CommandLineRunner {
 
     @Value("${shadow.auto-init}")
@@ -35,7 +37,10 @@ public class ShadowInit implements CommandLineRunner {
             for (Vending v : vendingList) {
                 dataMap.put(v.getTopic(), v);
             }
-            ShadowFactory.batchInjectShadow(dataMap);
+            boolean injectResult = ShadowFactory.batchInjectShadow(dataMap);
+            if (injectResult) {
+                log.info("inject success!");
+            }
         }
     }
 }

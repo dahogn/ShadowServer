@@ -1,6 +1,5 @@
 package com.runhang.shadow.client.device.entity;
 
-import com.runhang.shadow.client.core.databaseSync.ShadowSubject;
 import com.runhang.shadow.client.core.model.DatabaseField;
 
 import javax.persistence.*;
@@ -9,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @Entity
-public class CargoRoad extends ShadowSubject {
+public class CargoRoad extends ShadowEntity {
 
 @Transient
 public static Map<String, DatabaseField> databaseFieldMap;
@@ -19,11 +18,6 @@ databaseFieldMap.put("serial", new DatabaseField("cargo_road", "serial"));
 databaseFieldMap.put("id", new DatabaseField("cargo_road", "id"));
 }
 
-@Id
-@GeneratedValue
-private int id;
-public void setId(int id) { this.id = id; }
-public int getId() { return id; }
 @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 @JoinColumn(name = "commodity_id")
 private List<Commodity> commodity;
