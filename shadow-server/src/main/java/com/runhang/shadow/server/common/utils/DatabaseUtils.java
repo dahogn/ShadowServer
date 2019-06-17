@@ -22,7 +22,11 @@ class DatabaseUtils {
      * @Date 2019/6/11 19:28
      */
     static String generateForeignKey(String field) {
-        return camel2Underline(new StringBuffer(field)) + "_id";
+        String key = camel2Underline(new StringBuffer(field)).toString();
+        if (key.startsWith("_")) {
+            key = key.substring(1);
+        }
+        return key + "_id";
     }
 
     /**

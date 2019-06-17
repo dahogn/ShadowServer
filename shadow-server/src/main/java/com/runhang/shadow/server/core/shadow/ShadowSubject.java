@@ -1,4 +1,4 @@
-package com.runhang.shadow.server.core.databaseSync;
+package com.runhang.shadow.server.core.shadow;
 
 import com.runhang.shadow.server.core.model.DatabaseField;
 

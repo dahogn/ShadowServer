@@ -1,6 +1,7 @@
 package com.runhang.shadow.server.common.utils;
 
 import com.runhang.shadow.server.core.model.DatabaseField;
+import com.runhang.shadow.server.core.model.EntityDetail;
 import com.runhang.shadow.server.core.model.ShadowCode;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Attribute;
@@ -92,12 +93,13 @@ public class ParseXMLUtils {
             }
             Element root = document.getRootElement();   // 根元素
 
+            Map<String, EntityDetail> entityAttr = new HashMap<>();  // 实体属性
             Map<String, String> entityCode = new HashMap<>();   // 实体类源码
             Map<String, String> repositoryCode = new HashMap<>();   // 数据库映射源码
             Map<String, String> initCode = new HashMap<>();     // 初始化代码
             List<String> deviceName = new ArrayList<>();    // 使用影子平台管理的设备类
 
-            // 遍历节点下元素生成类代码
+            /** step 1. 遍历节点下元素生成类代码 */
             for (Iterator<Element> itClass = root.elementIterator(); itClass.hasNext(); ) {
                 Element clazz = itClass.next();
                 String className = clazz.attribute("name").getValue();
@@ -119,14 +121,25 @@ public class ParseXMLUtils {
                     String attrName = field.getText();
                     dealClassAttribute(attrName, field, databaseFieldMap, propertyMap);
                 }
-                // 生成代码
-                String sourceStr = ClassUtils.generateEntityCode(className, propertyMap, databaseFieldMap);
+
+                // 记录属性
+                entityAttr.put(className, new EntityDetail(propertyMap, databaseFieldMap));
+            }
+
+            /** step 2. 生成实体代码 */
+            for (String className : entityAttr.keySet()) {
+                EntityDetail entityDetail = entityAttr.get(className);
+                String sourceStr = ClassUtils.generateEntityCode(
+                        className,
+                        entityDetail.getPropertyMap(),
+                        entityDetail.getDatabaseFieldMap(),
+                        entityAttr.keySet());
                 entityCode.put(className, sourceStr);
                 String repositoryStr = ClassUtils.generateRepositoryCode(className);
                 repositoryCode.put(DatabaseUtils.generateRepositoryName(className), repositoryStr);
             }
 
-            // 生成初始化代码
+            /** step 3. 生成初始化代码 */
             String init = ClassUtils.generateInitCode(deviceName);
             initCode.put("ShadowInit", init);
 

@@ -53,18 +53,20 @@ public class ClassUtils {
      * @param className 类名
      * @param propertyMap 属性定义
      * @param databaseFieldMap 数据库字段映射
+     * @param classSet 所有实体类名
      * @return java代码
      */
-    public static String generateEntityCode(String className, Map<String, String> propertyMap, Map<String, DatabaseField> databaseFieldMap) {
+    public static String generateEntityCode(String className, Map<String, String> propertyMap,
+                                            Map<String, DatabaseField> databaseFieldMap,
+                                            Set<String> classSet) {
         StringBuilder codeStr =
                 new StringBuilder(
                         "package " + ENTITY_PACKAGE_NAME + ";\n\n" +  // 包
                         "import java.util.*;\n" +
                         "import javax.persistence.*;\n" +
-                        "import " + MAIN_PACKAGE_NAME + "core.model.DatabaseField;\n" +
-                        "import " + MAIN_PACKAGE_NAME + "core.databaseSync.ShadowSubject;\n\n" +    // 导包
+                        "import " + MAIN_PACKAGE_NAME + "core.model.DatabaseField;\n\n" +   // 导包
                         "@Entity\n" +
-                        "public class " + className + " extends ShadowSubject {\n\n" +
+                        "public class " + className + " extends ShadowEntity {\n\n" +
                         "@Transient\n" +
                         "public static Map<String, DatabaseField> databaseFieldMap;\n");
 
@@ -78,12 +80,6 @@ public class ClassUtils {
         }
         codeStr.append("}\n\n");
 
-        codeStr.append(
-                "@Id\n@GeneratedValue\n" +
-                "private int id;\n" +
-                "public void setId(int id) { this.id = id; }\n" +
-                "public int getId() { return id; }\n\n");
-
         // 属性 & getter & setter
         for (Map.Entry<String, String> entry : propertyMap.entrySet()) {
             String field = entry.getKey();
@@ -91,7 +87,11 @@ public class ClassUtils {
             // list属性增加表的关联映射
             if (type.startsWith("List")) {
                 codeStr.append("@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)\n");
-                codeStr.append(String.format("@JoinColumn(name = \"%s\")\n", DatabaseUtils.generateForeignKey(field)));
+                codeStr.append(String.format("@JoinColumn(name = \"%s\")\n", DatabaseUtils.generateForeignKey(className)));
+            }
+            // 嵌套单个实体增加映射
+            if (classSet.contains(type)) {
+                codeStr.append("@OneToOne(fetch = FetchType.EAGER)\n");
             }
             codeStr.append(String.format(
                     "private %s %s;\n" +
@@ -146,7 +146,7 @@ public class ClassUtils {
                 "private String[] deviceList = {" + entityList + "};\n\n" +
                 "@Override\npublic void run(String... args) throws Exception {\n" +
                 "if (autoInit) {\n" +
-                "======================= code ============================" +
+                "// ======================= code ============================" +
                 "}\n" +
                 "}\n" +
                 "}\n";
