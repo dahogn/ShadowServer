@@ -37,7 +37,6 @@ public class ShadowInit implements CommandLineRunner {
             List<Vending> vendingList = vendingRepository.findAll();
             // 删除空的实体
             ShadowFactory.destroyEntities();
-
             // 注入影子和实体
             List<String> entityNames = ClassUtils.getAllEntityName();
             for (Vending v : vendingList) {

@@ -267,6 +267,7 @@ public class ShadowFactory {
         for (String beanName : entitySriSet) {
             BeanUtils.destroyBean(beanName);
         }
+        entitySriSet.clear();
     }
 
 }

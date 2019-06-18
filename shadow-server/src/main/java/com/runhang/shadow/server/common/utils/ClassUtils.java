@@ -131,25 +131,56 @@ public class ClassUtils {
      * @Date 2019/6/12 20:50
      */
     public static String generateInitCode(List<String> classList) {
-        StringBuilder entitySb = new StringBuilder();
-        for (String className : classList) {
-            entitySb.append("\"").append(ENTITY_PACKAGE_NAME).append(".").append(className).append("\",");
-        }
-        String entityList = entitySb.deleteCharAt(entitySb.length() - 1).toString();
-
-        return "package " + INIT_PACKAGE_NAME + ";\n\n" +
-                "import org.springframework.beans.factory.annotation.Value;\n" +    // 包
+        StringBuilder builder = new StringBuilder("package " + INIT_PACKAGE_NAME + ";\n\n" +
+                "import " + MAIN_PACKAGE_NAME + "common.utils.ClassUtils;\n" +      // 包
+                "import " + MAIN_PACKAGE_NAME + "core.shadow.ShadowFactory;\n" +
+                "import " + ENTITY_PACKAGE_NAME + ".*;\n" +
+                "import " + REPOSITORY_PACKAGE_NAME + ".*;\n" +
+                "import lombok.extern.slf4j.Slf4j;\n" +
+                "import java.util.*;\n" +
+                "import org.springframework.beans.factory.annotation.Value;\n" +
+                "import org.springframework.beans.factory.annotation.Autowired;\n" +
                 "import org.springframework.boot.CommandLineRunner;\n" +
                 "import org.springframework.stereotype.Component;\n\n" +
-                "@Component\npublic class ShadowInit implements CommandLineRunner {\n" +
-                "@Value(\"${shadow.auto-init}\")\nprivate boolean autoInit;\n\n" +  // 是否自动加载
-                "private String[] deviceList = {" + entityList + "};\n\n" +
-                "@Override\npublic void run(String... args) throws Exception {\n" +
-                "if (autoInit) {\n" +
-                "// ======================= code ============================" +
-                "}\n" +
-                "}\n" +
-                "}\n";
+                "@Slf4j\n@Component\npublic class ShadowInit implements CommandLineRunner {\n" +
+                "@Value(\"${shadow.auto-init}\")\nprivate boolean autoInit;\n\n" // 是否自动加载
+        );
+
+        // 数据库映射注入
+        for (String className : classList) {
+            String fieldType = DatabaseUtils.generateRepositoryName(className);
+            builder.append("@Autowired\nprivate ")
+                    .append(fieldType).append(" ")
+                    .append(generateFieldName(fieldType)).append(";\n");
+        }
+
+        // 初始化代码
+        builder.append("\n@Override\npublic void run(String... args) throws Exception {\n")
+                .append("if (autoInit) {\n")
+                .append("Map<String, Object> dataMap = new HashMap<>();\n");
+        // 数据库查询实体
+        for (String className : classList) {
+            builder.append("List<").append(className).append("> ")
+                    .append(generateFieldName(className)).append(" = ")
+                    .append(generateFieldName(DatabaseUtils.generateRepositoryName(className)))
+                    .append(".findAll();\n");
+        }
+        // 删除空实体
+        builder.append("ShadowFactory.destroyEntities();\n")
+                .append("List<String> entityNames = ClassUtils.getAllEntityName();\n");
+        // 影子与实体注入
+        for (String className : classList) {
+            String field = "" + className.charAt(0);
+            builder.append(String.format(
+                    "for (%s %s : %s) {\n" +
+                    "dataMap.put(%s.getTopic(), %s);\n" +
+                    "ShadowFactory.injectEntities(%s, entityNames);\n}\n",
+                    className, field, generateFieldName(className), field, field, field));
+        }
+        builder.append("ShadowFactory.batchInjectShadow(dataMap);\n");
+        builder.append("}\n}\n}");
+
+        return builder.toString();
     }
 
     /**
@@ -269,6 +300,21 @@ public class ClassUtils {
      */
     public static String getClassFullName(String className) {
         return ENTITY_PACKAGE_NAME + "." + className;
+    }
+
+    /**
+     * @Description 生成属性名
+     * @param typeName 类型名称
+     * @return 属性名
+     * @author szh
+     * @Date 2019/6/18 15:17
+     */
+    private static String generateFieldName(String typeName) {
+        if (Character.isUpperCase(typeName.charAt(0))) {
+            return typeName;
+        } else {
+            return Character.toUpperCase(typeName.charAt(0)) + typeName.substring(1);
+        }
     }
 
 }
