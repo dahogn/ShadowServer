@@ -1,11 +1,13 @@
 package com.runhang.shadow.client.device.entity;
 
+import com.runhang.shadow.client.core.model.DatabaseField;
 import com.runhang.shadow.client.core.shadow.ShadowFactory;
 import com.runhang.shadow.client.core.shadow.ShadowSubject;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -19,7 +21,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class ShadowEntity extends ShadowSubject implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     /**
@@ -36,6 +38,12 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
     ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
 
     /**
+     * 数据库字段映射关系
+     */
+    @Transient
+    public static Map<String, DatabaseField> databaseFieldMap;
+
+    /**
      * @Description 初始化生成SRI并注入容器
      * @author szh
      * @Date 2019/6/16 19:54
@@ -44,7 +52,7 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
         super();
         this.SRI = generateSRI();
         boolean injectRe = ShadowFactory.injectEntity(this);
-        log.info("inject " + SRI + ": " + injectRe);
+        //log.info("inject " + SRI + ": " + injectRe);
     }
 
     public void setId(int id) {
@@ -57,6 +65,7 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
 
     public void setSRI(String SRI) {
         this.SRI = SRI;
+        log.warn("set sri: " + SRI);
     }
 
     public String getSRI() {

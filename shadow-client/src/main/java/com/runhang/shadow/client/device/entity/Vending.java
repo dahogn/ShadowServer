@@ -10,9 +10,6 @@ import java.util.Map;
 @Entity
 public class Vending extends ShadowEntity {
 
-    @Transient
-    public static Map<String, DatabaseField> databaseFieldMap;
-
     static {
         databaseFieldMap = new HashMap<>();
         databaseFieldMap.put("name", new DatabaseField("vending", "name"));
@@ -44,7 +41,7 @@ public class Vending extends ShadowEntity {
     }
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "cargo_road_id")
+    @JoinColumn(name = "vending_id")
     private List<CargoRoad> cargoRoad;
 
     public void setCargoRoad(List<CargoRoad> cargoRoad) {

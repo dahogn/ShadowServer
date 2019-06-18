@@ -1,5 +1,6 @@
 package com.runhang.shadow.client.device.init;
 
+import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.shadow.ShadowFactory;
 import com.runhang.shadow.client.device.entity.Vending;
 import com.runhang.shadow.client.device.repository.VendingRepository;
@@ -34,8 +35,15 @@ public class ShadowInit implements CommandLineRunner {
         if (autoInit) {
             Map<String, Object> dataMap = new HashMap<>();
             List<Vending> vendingList = vendingRepository.findAll();
+            // 删除空的实体
+            ShadowFactory.destroyEntities();
+
+            // 注入影子和实体
+            List<String> entityNames = ClassUtils.getAllEntityName();
             for (Vending v : vendingList) {
                 dataMap.put(v.getTopic(), v);
+                // 实体
+                ShadowFactory.injectEntities(v, entityNames);
             }
             boolean injectResult = ShadowFactory.batchInjectShadow(dataMap);
             if (injectResult) {

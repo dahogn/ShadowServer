@@ -35,6 +35,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!--数据库-->
         <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
         <dependency>
             <groupId>mysql</groupId>

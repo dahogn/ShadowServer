@@ -1,6 +1,7 @@
 package com.runhang.shadow.client.core.shadow;
 
 import com.runhang.shadow.client.common.utils.BeanUtils;
+import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.bean.ShadowBean;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
@@ -11,10 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.util.*;
 
 /**
  * @ClassName ShadowFactory
@@ -222,6 +221,52 @@ public class ShadowFactory {
         entitySriSet.add(sri);
         BeanUtils.injectExistBean(shadowEntity, sri);
         return true;
+    }
+
+    /**
+     * @Description 递归注入所有实体
+     * @param shadowEntity 实体
+     * @param entityNames 所有实体类名
+     * @author szh
+     * @Date 2019/6/18 11:23
+     */
+    public static void injectEntities(ShadowEntity shadowEntity, List<String> entityNames) {
+        // 注入自身
+        injectEntity(shadowEntity);
+        // 获取所有属性类型
+        Class entityClass = shadowEntity.getClass();
+        Field[] fields = entityClass.getDeclaredFields();
+
+        for (Field field : fields) {
+            field.setAccessible(true);
+            String fieldType = field.getType().getSimpleName();
+            if (entityNames.contains(fieldType)) {
+                // 如果是实体直接注入
+                ShadowEntity shadowField = (ShadowEntity) ClassUtils.getValue(shadowEntity, field.getName());
+                if (null != shadowField) {
+                    injectEntities(shadowField, entityNames);
+                }
+            } else if ("List".equals(fieldType)) {
+                // 如果是list，遍历注入
+                List<ShadowEntity> shadowFields = (List<ShadowEntity>) ClassUtils.getValue(shadowEntity, field.getName());
+                if (null != shadowFields) {
+                    for (ShadowEntity shadowField : shadowFields) {
+                        injectEntities(shadowField, entityNames);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @Description 清空实体
+     * @author szh
+     * @Date 2019/6/18 0:09
+     */
+    public static void destroyEntities() {
+        for (String beanName : entitySriSet) {
+            BeanUtils.destroyBean(beanName);
+        }
     }
 
 }

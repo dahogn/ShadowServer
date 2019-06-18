@@ -34,5 +34,5 @@ com:
     preFix: 'tcp://'
 
 shadow:
-  auto-init: false
+  auto-init: true
 

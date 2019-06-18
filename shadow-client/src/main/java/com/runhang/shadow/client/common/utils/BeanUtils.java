@@ -86,9 +86,24 @@ public class BeanUtils implements ApplicationContextAware {
      * @param beanName bean name
      */
     public static void injectExistBean(Object bean, String beanName) {
+        try {
+            DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) getApplicationContext().getAutowireCapableBeanFactory();
+            beanFactory.applyBeanPostProcessorsAfterInitialization(bean, beanName);
+            beanFactory.registerSingleton(beanName, bean);
+        } catch (Exception e) {
+            log.warn(e.getMessage());
+        }
+    }
+
+    /**
+     * @Description 删除容器中的bean
+     * @param beanName bean name
+     * @author szh
+     * @Date 2019/6/18 0:06
+     */
+    public static void destroyBean(String beanName) {
         DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) getApplicationContext().getAutowireCapableBeanFactory();
-        beanFactory.applyBeanPostProcessorsAfterInitialization(bean, beanName);
-        beanFactory.registerSingleton(beanName, bean);
+        beanFactory.destroySingleton(beanName);
     }
 
 }
