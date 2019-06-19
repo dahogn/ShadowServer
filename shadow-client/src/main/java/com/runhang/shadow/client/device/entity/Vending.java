@@ -1,11 +1,11 @@
 package com.runhang.shadow.client.device.entity;
 
 import com.runhang.shadow.client.core.model.DatabaseField;
+import com.runhang.shadow.client.core.model.EntityField;
 
 import javax.persistence.*;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 public class Vending extends ShadowEntity {
@@ -19,9 +19,9 @@ public class Vending extends ShadowEntity {
     private String name;
 
     public void setName(String name) {
-        rwLock.writeLock().lock();
         this.name = name;
-        rwLock.writeLock().unlock();
+        EntityField field = new EntityField("Vending", "name", name);
+        notifyObservers(databaseFieldMap.get("name"), field);
     }
 
     public String getName() {
@@ -31,9 +31,9 @@ public class Vending extends ShadowEntity {
     private String topic;
 
     public void setTopic(String topic) {
-        rwLock.writeLock().lock();
         this.topic = topic;
-        rwLock.writeLock().unlock();
+        EntityField field = new EntityField("Vending", "topic", topic);
+        notifyObservers(databaseFieldMap.get("topic"), field);
     }
 
     public String getTopic() {
@@ -45,9 +45,9 @@ public class Vending extends ShadowEntity {
     private List<CargoRoad> cargoRoad;
 
     public void setCargoRoad(List<CargoRoad> cargoRoad) {
-        rwLock.writeLock().lock();
         this.cargoRoad = cargoRoad;
-        rwLock.writeLock().unlock();
+        EntityField field = new EntityField("Vending", "cargoRoad", cargoRoad);
+        notifyObservers(databaseFieldMap.get("cargoRoad"), field);
     }
 
     public List<CargoRoad> getCargoRoad() {

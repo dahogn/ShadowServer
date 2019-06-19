@@ -1,6 +1,7 @@
 package com.runhang.shadow.client.core.shadow;
 
 import com.runhang.shadow.client.core.model.DatabaseField;
+import com.runhang.shadow.client.core.model.EntityField;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,12 +39,13 @@ public class ShadowSubject {
     /**
      * @Description 通知观察者
      * @param data 更改数据
+     * @param field 实体变化属性
      * @author szh
      * @Date 2019/6/5 20:30
      */
-    protected void notifyObservers(DatabaseField data) {
+    protected void notifyObservers(DatabaseField data, EntityField field) {
         for (ShadowObserver o : observers) {
-            o.onFieldUpdate(data);
+            o.onFieldUpdate(data, field);
         }
     }
 

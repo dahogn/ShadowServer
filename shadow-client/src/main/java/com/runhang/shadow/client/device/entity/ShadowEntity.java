@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @ClassName ShadowEntity
@@ -32,10 +31,10 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
     private String SRI;
 
     /**
-     * 重入读写锁
+     * 实体所属的影子对象的topic
      */
     @Transient
-    ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+    private String entityTopic;
 
     /**
      * 数据库字段映射关系
@@ -43,16 +42,21 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
     @Transient
     public static Map<String, DatabaseField> databaseFieldMap;
 
+    ShadowEntity() {
+
+    }
+
     /**
      * @Description 初始化生成SRI并注入容器
      * @author szh
      * @Date 2019/6/16 19:54
      */
-    ShadowEntity() {
+    public ShadowEntity(String topic) throws Exception {
         super();
         this.SRI = generateSRI();
         boolean injectRe = ShadowFactory.injectEntity(this);
         //log.info("inject " + SRI + ": " + injectRe);
+        this.entityTopic =  topic;
     }
 
     public void setId(int id) {
@@ -65,11 +69,18 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
 
     public void setSRI(String SRI) {
         this.SRI = SRI;
-        log.warn("set sri: " + SRI);
     }
 
     public String getSRI() {
         return SRI;
+    }
+
+    public String getEntityTopic() {
+        return entityTopic;
+    }
+
+    public void setEntityTopic(String entityTopic) {
+        this.entityTopic = entityTopic;
     }
 
     /**

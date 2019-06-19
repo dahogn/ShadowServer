@@ -174,8 +174,8 @@ public class ClassUtils {
             builder.append(String.format(
                     "for (%s %s : %s) {\n" +
                     "dataMap.put(%s.getTopic(), %s);\n" +
-                    "ShadowFactory.injectEntities(%s, entityNames);\n}\n",
-                    className, field, generateFieldName(className), field, field, field));
+                    "ShadowFactory.injectEntities(%s, %s.getTopic(), entityNames);\n}\n",
+                    className, field, generateFieldName(className), field, field, field, field));
         }
         builder.append("ShadowFactory.batchInjectShadow(dataMap);\n");
         builder.append("}\n}\n}");

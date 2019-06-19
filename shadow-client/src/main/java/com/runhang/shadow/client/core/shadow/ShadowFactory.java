@@ -4,6 +4,7 @@ import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.bean.ShadowBean;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
+import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 import com.runhang.shadow.client.core.mqtt.TopicUtils;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
@@ -89,6 +90,8 @@ public class ShadowFactory {
         }
     }
 
+    /* ================================================== 影子注入 ================================================== */
+
     /**
      * @Description 注入影子到容器
      * @param data 管理对象
@@ -155,6 +158,83 @@ public class ShadowFactory {
         }
     }
 
+    /* ================================================== 实体注入 ================================================== */
+
+    /**
+     * @Description 注入影子的各个部分
+     * @param shadowEntity 影子部分实体
+     * @throws NoTopicException 实体无主题异常
+     * @return 是否成功
+     * @author szh
+     * @Date 2019/6/16 19:51
+     */
+    public static boolean injectEntity(ShadowEntity shadowEntity) throws NoTopicException {
+        if (null == shadowEntity.getEntityTopic() || "".equals(shadowEntity.getEntityTopic())) {
+            throw new NoTopicException();
+        }
+        String sri = shadowEntity.getSRI();
+        if (entitySriSet.contains(sri)) {
+            return false;
+        }
+        entitySriSet.add(sri);
+        BeanUtils.injectExistBean(shadowEntity, sri);
+        // 增加订阅
+        shadowEntity.addObserver(new EntityDataObserver(shadowEntity.getEntityTopic(), sri));
+        return true;
+    }
+
+    /**
+     * @Description 递归注入所有实体
+     * @param shadowEntity 实体
+     * @param topic 主题
+     * @param entityNames 所有实体类名
+     * @author szh
+     * @Date 2019/6/18 11:23
+     */
+    public static void injectEntities(ShadowEntity shadowEntity, String topic,
+                                      List<String> entityNames) throws NoTopicException {
+        // 注入自身
+        shadowEntity.setEntityTopic(topic);
+        injectEntity(shadowEntity);
+        // 获取所有属性类型
+        Class entityClass = shadowEntity.getClass();
+        Field[] fields = entityClass.getDeclaredFields();
+
+        for (Field field : fields) {
+            field.setAccessible(true);
+            String fieldType = field.getType().getSimpleName();
+            if (entityNames.contains(fieldType)) {
+                // 如果是实体直接注入
+                ShadowEntity shadowField = (ShadowEntity) ClassUtils.getValue(shadowEntity, field.getName());
+                if (null != shadowField) {
+                    injectEntities(shadowField, topic, entityNames);
+                }
+            } else if ("List".equals(fieldType)) {
+                // 如果是list，遍历注入
+                List<ShadowEntity> shadowFields = (List<ShadowEntity>) ClassUtils.getValue(shadowEntity, field.getName());
+                if (null != shadowFields) {
+                    for (ShadowEntity shadowField : shadowFields) {
+                        injectEntities(shadowField, topic, entityNames);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @Description 清空实体
+     * @author szh
+     * @Date 2019/6/18 0:09
+     */
+    public static void destroyEntities() {
+        for (String beanName : entitySriSet) {
+            BeanUtils.destroyBean(beanName);
+        }
+        entitySriSet.clear();
+    }
+
+    /* ================================================== 影子通信 ================================================== */
+
     /**
      * @Description 通过主题更新影子文档
      * @param topic 主题
@@ -204,70 +284,6 @@ public class ShadowFactory {
         long current = shadowBean.getDoc().getTimestamp();
         controlPush.push(topic, shadowBean.getDoc(), current);
         return null;
-    }
-
-    /**
-     * @Description 注入影子的各个部分
-     * @param shadowEntity 影子部分实体
-     * @return 是否成功
-     * @author szh
-     * @Date 2019/6/16 19:51
-     */
-    public static boolean injectEntity(ShadowEntity shadowEntity) {
-        String sri = shadowEntity.getSRI();
-        if (entitySriSet.contains(sri)) {
-            return false;
-        }
-        entitySriSet.add(sri);
-        BeanUtils.injectExistBean(shadowEntity, sri);
-        return true;
-    }
-
-    /**
-     * @Description 递归注入所有实体
-     * @param shadowEntity 实体
-     * @param entityNames 所有实体类名
-     * @author szh
-     * @Date 2019/6/18 11:23
-     */
-    public static void injectEntities(ShadowEntity shadowEntity, List<String> entityNames) {
-        // 注入自身
-        injectEntity(shadowEntity);
-        // 获取所有属性类型
-        Class entityClass = shadowEntity.getClass();
-        Field[] fields = entityClass.getDeclaredFields();
-
-        for (Field field : fields) {
-            field.setAccessible(true);
-            String fieldType = field.getType().getSimpleName();
-            if (entityNames.contains(fieldType)) {
-                // 如果是实体直接注入
-                ShadowEntity shadowField = (ShadowEntity) ClassUtils.getValue(shadowEntity, field.getName());
-                if (null != shadowField) {
-                    injectEntities(shadowField, entityNames);
-                }
-            } else if ("List".equals(fieldType)) {
-                // 如果是list，遍历注入
-                List<ShadowEntity> shadowFields = (List<ShadowEntity>) ClassUtils.getValue(shadowEntity, field.getName());
-                if (null != shadowFields) {
-                    for (ShadowEntity shadowField : shadowFields) {
-                        injectEntities(shadowField, entityNames);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @Description 清空实体
-     * @author szh
-     * @Date 2019/6/18 0:09
-     */
-    public static void destroyEntities() {
-        for (String beanName : entitySriSet) {
-            BeanUtils.destroyBean(beanName);
-        }
-        entitySriSet.clear();
     }
 
 }

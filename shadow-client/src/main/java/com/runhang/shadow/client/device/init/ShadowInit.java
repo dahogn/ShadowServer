@@ -1,7 +1,9 @@
 package com.runhang.shadow.client.device.init;
 
+import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.shadow.ShadowFactory;
+import com.runhang.shadow.client.device.entity.Commodity;
 import com.runhang.shadow.client.device.entity.Vending;
 import com.runhang.shadow.client.device.repository.VendingRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +44,19 @@ public class ShadowInit implements CommandLineRunner {
             for (Vending v : vendingList) {
                 dataMap.put(v.getTopic(), v);
                 // 实体
-                ShadowFactory.injectEntities(v, entityNames);
+                ShadowFactory.injectEntities(v, v.getTopic(), entityNames);
             }
             boolean injectResult = ShadowFactory.batchInjectShadow(dataMap);
             if (injectResult) {
                 log.info("inject success!");
+            }
+
+            // 测试实体注入
+            Commodity commodity = (Commodity) BeanUtils.getBean("Commodity_1560758106907_511");
+            if (null == commodity) {
+                log.warn(">>>>>>>>>>>>>>>>>>>>> commodity is null");
+            } else {
+                log.info(">>>>>>>>>>>>>>>>>>>>> commodity's name: " + commodity.getName());
             }
         }
     }

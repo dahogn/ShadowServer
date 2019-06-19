@@ -14,7 +14,7 @@ public enum ReErrorCode {
     METHOD_INVALID("406", "影子JSON method是无效的方法"),
     CONTENT_IS_NULL("407", "影子内容为空"),
     REPORTED_OVER_MAX("408", "影子reported属性个数超过128个"),
-    VERSION_CONFLIC("409", "影子版本冲突"),
+    VERSION_CONFLICT("409", "影子版本冲突"),
     SHADOW_ATTR_WRONG("500", "影子属性不存在"),
     SHADOW_IS_WRITING("501", "影子正在写入"),
     SHADOW_ATTR_NOT_MODIFIED("502", "影子属性未修改"),

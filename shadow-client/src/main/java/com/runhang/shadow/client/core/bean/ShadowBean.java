@@ -3,6 +3,8 @@ package com.runhang.shadow.client.core.bean;
 import com.alibaba.fastjson.JSONObject;
 import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
+import com.runhang.shadow.client.core.model.ShadowField;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -17,6 +19,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author szh
  **/
 @Slf4j
+@Data
 public class ShadowBean<T> {
 
     /** 影子读写锁 **/
@@ -28,6 +31,12 @@ public class ShadowBean<T> {
     private T data;
     /** 影子文档 **/
     private ShadowDoc doc;
+    /**
+     * 影子变更属性
+     * key sri
+     * value：变更属性
+     */
+    private Map<String, ShadowField> shadowField;
 
     public ShadowBean() {
         ShadowDoc doc = new ShadowDoc();
@@ -35,28 +44,28 @@ public class ShadowBean<T> {
         setDoc(doc);
     }
 
-    public String getTopic() {
-        return topic;
+    /**
+     * @Description 增加变更属性
+     * @param field 属性信息
+     * @author szh
+     * @Date 2019/6/19 14:28
+     */
+    public void addModifiedField(ShadowField field) {
+        if (shadowField.keySet().contains(field.getSri())) {
+            Map<String, Object> f = shadowField.get(field.getSri()).getField();
+            f.putAll(field.getField());
+        } else {
+            shadowField.put(field.getSri(), field);
+        }
     }
 
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public ShadowDoc getDoc() {
-        return doc;
-    }
-
-    public void setDoc(ShadowDoc doc) {
-        this.doc = doc;
+    /**
+     * @Description 清空变更属性
+     * @author szh
+     * @Date 2019/6/19 14:28
+     */
+    public void clearModifiedField() {
+        shadowField.clear();
     }
 
     /**

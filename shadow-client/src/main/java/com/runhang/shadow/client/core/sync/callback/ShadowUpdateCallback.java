@@ -29,7 +29,7 @@ public class ShadowUpdateCallback extends AbsMqttCallback {
 
         if (deviceVer > 0 && deviceVer <= shadowVer) { // 版本小于1时强制更新
             // 推送版本错误信息
-            updateReplyPush.pushError(shadowBean.getTopic(), ReErrorCode.VERSION_CONFLIC);
+            updateReplyPush.pushError(shadowBean.getTopic(), ReErrorCode.VERSION_CONFLICT);
             return;
         }
 
