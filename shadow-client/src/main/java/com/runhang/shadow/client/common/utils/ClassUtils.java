@@ -101,16 +101,7 @@ public class ClassUtils {
             Field[] fields = obj.getClass().getDeclaredFields();
             for (Field f : fields) {
                 f.setAccessible(true);
-                if (f.getType() == java.util.List.class || f.getType() == java.util.ArrayList.class) {
-                    if (f.getGenericType() instanceof ParameterizedType) {
-                        ParameterizedType pt = (ParameterizedType) f.getGenericType();
-                        String genericName = ((Class<?>) pt.getActualTypeArguments()[0]).getSimpleName();
-                        String fieldName = "List<" + genericName + ">";
-                        map.put(fieldName, f.get(obj));
-                    }
-                } else {
-                    map.put(f.getName(), f.get(obj));
-                }
+                map.put(f.getName(), f.get(obj));
             }
         } catch (Exception e) {
             log.error(e.getMessage());
