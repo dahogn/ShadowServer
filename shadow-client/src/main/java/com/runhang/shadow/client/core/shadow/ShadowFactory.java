@@ -8,6 +8,7 @@ import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 import com.runhang.shadow.client.core.mqtt.TopicUtils;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
+import com.runhang.shadow.client.device.database.DatabaseOperation;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -245,7 +246,12 @@ public class ShadowFactory {
     public static ReErrorCode commit(String topic) {
         ShadowBean shadowBean = getShadowBean(topic);
         long current = System.currentTimeMillis();
-        return shadowBean.updateShadowByServer(current);
+        ReErrorCode errorCode = shadowBean.updateShadowByServer(current);
+        if (null == errorCode) {
+            // 保存到数据库
+            DatabaseOperation.saveEntity(shadowBean.getData());
+        }
+        return errorCode;
     }
 
     /**

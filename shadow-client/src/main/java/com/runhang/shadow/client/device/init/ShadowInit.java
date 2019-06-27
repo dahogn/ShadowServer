@@ -6,6 +6,8 @@ import com.runhang.shadow.client.core.shadow.ShadowFactory;
 import com.runhang.shadow.client.device.entity.Commodity;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import com.runhang.shadow.client.device.entity.Vending;
+import com.runhang.shadow.client.device.repository.CargoRoadRepository;
+import com.runhang.shadow.client.device.repository.CommodityRepository;
 import com.runhang.shadow.client.device.repository.VendingRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,10 @@ public class ShadowInit implements CommandLineRunner {
 
     @Autowired
     private VendingRepository vendingRepository;
+    @Autowired
+    private CargoRoadRepository cargoRoadRepository;
+    @Autowired
+    private CommodityRepository commodityRepository;
 
     @Override
     public void run(String... args) throws Exception {
