@@ -340,7 +340,7 @@ public class ShadowBean {
     /**
      * 读数据，可以多个线程同时读， 所以上读锁即可
      */
-    public T get() {
+    public ShadowEntity get() {
         /* 上读锁 */
         rwLock.readLock().lock();
         try {
@@ -359,7 +359,7 @@ public class ShadowBean {
      *
      * @param data
      */
-    public void put(T data) {
+    public void put(ShadowEntity data) {
         /* 上写锁 */
         rwLock.writeLock().lock();
         try {
