@@ -1,9 +1,7 @@
 package com.runhang.shadow.client.core.bean;
 
 import com.alibaba.fastjson.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.runhang.shadow.client.device.entity.ShadowEntity;
 
 /**
  * @ClassName ShadowDocState
@@ -16,17 +14,21 @@ public class ShadowDocState {
     /** 设备上报数据 **/
     private String reported = "{}";
     /** 服务器期望数据 **/
-    private Map<String, Object> desired = new HashMap<>();
+    private ShadowDesiredDoc desired;
 
-    public Map<String, Object> getReported() {
-        return JSONObject.parseObject(reported);
+    public ShadowDocState() {
+        desired = new ShadowDesiredDoc();
+    }
+
+    public ShadowEntity getReported() {
+        return JSONObject.parseObject(reported, ShadowEntity.class);
     }
 
     public String getReportedStr() {
         return reported;
     }
 
-    public void setReported(Map<String, Object> reported) {
+    public void setReported(ShadowEntity reported) {
         this.reported = JSONObject.toJSONString(reported);
     }
 
@@ -34,11 +36,11 @@ public class ShadowDocState {
         this.reported = reported;
     }
 
-    public Map<String, Object> getDesired() {
+    public ShadowDesiredDoc getDesired() {
         return desired;
     }
 
-    public void setDesired(Map<String, Object> desired) {
+    public void setDesired(ShadowDesiredDoc desired) {
         this.desired = desired;
     }
 

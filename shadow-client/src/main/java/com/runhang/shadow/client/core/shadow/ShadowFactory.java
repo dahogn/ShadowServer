@@ -79,7 +79,7 @@ public class ShadowFactory {
 
             /** 1. 实例化device对象 **/
             Class shadowClass = Class.forName(className);
-            Object shadow = shadowClass.newInstance();
+            ShadowEntity shadow = (ShadowEntity) shadowClass.newInstance();
 
             /** 2. bean注入 **/
             return injectShadow(shadow, topic);
@@ -100,12 +100,12 @@ public class ShadowFactory {
      * @author szh
      * @Date 2019/5/5 14:14
      */
-    public static boolean injectShadow(Object data, String topic) {
+    public static boolean injectShadow(ShadowEntity data, String topic) {
         // 检查bean是否存在
         if (beanMap.containsKey(topic)) {
             return false;
         }
-        ShadowBean<Object> shadowBean = new ShadowBean<>();
+        ShadowBean shadowBean = new ShadowBean();
         shadowBean.setData(data);
         shadowBean.setTopic(topic);
 
@@ -119,7 +119,7 @@ public class ShadowFactory {
      * @author szh
      * @Date 2019/6/13 14:45
      */
-    public static boolean batchInjectShadow(Map<String, Object> dataMap) {
+    public static boolean batchInjectShadow(Map<String, ShadowEntity> dataMap) {
         for (String topic : dataMap.keySet()) {
             boolean success = injectShadow(dataMap.get(topic), topic);
             if (!success) {
@@ -276,9 +276,8 @@ public class ShadowFactory {
      */
     public static ReErrorCode push(String topic) {
         ShadowBean shadowBean = getShadowBean(topic);
-        Map<String, Object> desired = shadowBean.getDoc().getState().getDesired();
         // 检查是否修改
-        if (null == desired || desired.isEmpty()) {
+        if (shadowBean.getDoc().getState().getDesired().isEmpty()) {
             return ReErrorCode.SHADOW_ATTR_NOT_MODIFIED;
         }
         long current = shadowBean.getDoc().getTimestamp();

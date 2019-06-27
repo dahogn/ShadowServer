@@ -1,11 +1,17 @@
 package com.runhang.shadow.client.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @ClassName ClassUtils
@@ -13,6 +19,7 @@ import java.util.List;
  * @Date 2019/4/30 9:38
  * @author szh
  **/
+@Slf4j
 public class ClassUtils {
 
     private static final String MAIN_PACKAGE_NAME = "com.runhang.shadow.client.";
@@ -64,17 +71,51 @@ public class ClassUtils {
      * @return          属性值
      */
     public static Object getValue(Object obj, String fieldName) {
-        Class clazz = obj.getClass();
-        String methodName = getGetterSetterName(fieldName, METHOD_GETTER);
-        Object returnValue;
-        try {
-            Method method = clazz.getMethod(methodName);
-            returnValue = method.invoke(obj);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (null == obj || StringUtils.isEmpty(fieldName)) {
             return null;
         }
-        return returnValue;
+        try {
+            Field field = obj.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(obj);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * @Description 获取bean的所有属性名及值
+     * @param obj bean
+     * @return 属性名及对应值
+     * @author szh
+     * @Date 2019/6/26 16:58
+     */
+    public static Map<String, Object> getValueMap(Object obj) {
+        Map<String, Object> map = new HashMap<>();
+        if (null == obj) {
+            return map;
+        }
+
+        try {
+            Field[] fields = obj.getClass().getDeclaredFields();
+            for (Field f : fields) {
+                f.setAccessible(true);
+                if (f.getType() == java.util.List.class || f.getType() == java.util.ArrayList.class) {
+                    if (f.getGenericType() instanceof ParameterizedType) {
+                        ParameterizedType pt = (ParameterizedType) f.getGenericType();
+                        String genericName = ((Class<?>) pt.getActualTypeArguments()[0]).getSimpleName();
+                        String fieldName = "List<" + genericName + ">";
+                        map.put(fieldName, f.get(obj));
+                    }
+                } else {
+                    map.put(f.getName(), f.get(obj));
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return map;
     }
 
     /**

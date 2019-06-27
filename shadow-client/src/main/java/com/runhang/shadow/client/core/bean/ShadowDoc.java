@@ -30,7 +30,8 @@ public class ShadowDoc {
     }
 
     public ShadowDocData getStateTrans() {
-        return new ShadowDocData(state.getReported(), state.getDesired());
+        //return new ShadowDocData(state.getReported(), state.getDesired());
+        return new ShadowDocData();
     }
 
 }

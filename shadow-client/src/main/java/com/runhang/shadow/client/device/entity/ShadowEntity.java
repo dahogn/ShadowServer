@@ -95,4 +95,12 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
                 (int) (Math.random() * 1000);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ShadowEntity)) {
+            return false;
+        }
+        return this.SRI.equals(((ShadowEntity) o).getSRI());
+    }
+
 }

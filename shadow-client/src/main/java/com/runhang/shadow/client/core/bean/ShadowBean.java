@@ -2,15 +2,19 @@ package com.runhang.shadow.client.core.bean;
 
 import com.alibaba.fastjson.JSONObject;
 import com.runhang.shadow.client.common.utils.ClassUtils;
+import com.runhang.shadow.client.core.enums.EntityOperation;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
 import com.runhang.shadow.client.core.model.ShadowField;
+import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName ShadowBean
@@ -20,7 +24,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  **/
 @Slf4j
 @Data
-public class ShadowBean<T> {
+public class ShadowBean {
 
     /** 影子读写锁 **/
     private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -28,7 +32,7 @@ public class ShadowBean<T> {
     /** 影子主题 **/
     private String topic;
     /** 影子对象 **/
-    private T data;
+    private ShadowEntity data;
     /** 影子文档 **/
     private ShadowDoc doc;
     /**
@@ -36,11 +40,12 @@ public class ShadowBean<T> {
      * key sri
      * value：变更属性
      */
-    private Map<String, ShadowField> shadowField;
+    private Map<String, ShadowField> shadowField = new HashMap<>();
 
     public ShadowBean() {
         ShadowDoc doc = new ShadowDoc();
         doc.setState(new ShadowDocState());
+        doc.setMetadata(new ShadowDocData());
         setDoc(doc);
     }
 
@@ -76,7 +81,7 @@ public class ShadowBean<T> {
      * @Date 2019/5/2 15:55
      */
     public ReErrorCode updateShadowByDevice(Map<String, Object> updateValue) {
-        // 判断是否加了写锁
+        /*// 判断是否加了写锁
         if (rwLock.isWriteLocked()) {
             return ReErrorCode.SHADOW_IS_WRITING;
         }
@@ -118,7 +123,8 @@ public class ShadowBean<T> {
             return ReErrorCode.SERVER_ERROR;
         } finally {
             rwLock.writeLock().unlock();
-        }
+        }*/
+        return null;
     }
 
     /**
@@ -160,31 +166,41 @@ public class ShadowBean<T> {
         }
         rwLock.writeLock().lock();
         try {
-            Map<String, Object> diffAttr = compareAttr();
-            if (diffAttr.isEmpty()) {
-                // 属性未修改或判断出错
-                return ReErrorCode.SHADOW_ATTR_NOT_MODIFIED;
-            }
-            // 回退影子对象
+            // 对照list的变更
+            List<String> entityNames = ClassUtils.getAllEntityName();
+            compareAttr(data, doc.getState().getReported(), entityNames);
+            // 回退影子对象，当设备端修改成功之后才更改影子对象
             shadowRevert();
             // 更新文档
-            for (String attr : diffAttr.keySet()) {
-                // desire
-                doc.getState().getDesired().put(attr, diffAttr.get(attr));
-                // metadata
-                ShadowDocData metadata = doc.getMetadata();
-                if (null == metadata) {
-                    metadata = new ShadowDocData();
+            // desired
+            for (ShadowField sf : shadowField.values()) {
+                switch (sf.getOperation()) {
+                    case ADD:
+                        doc.getState().getDesired().getAdd().add(sf);
+                        break;
+
+                    case DELETE:
+                        doc.getState().getDesired().getDelete().add(sf.getSri());
+                        break;
+
+                    case UPDATE:
+                        doc.getState().getDesired().getUpdate().add(sf);
+                        break;
                 }
+            }
+            // metadata
+            for (String sri : shadowField.keySet()) {
                 Map<String, Object> metadataTime = new HashMap<>();
                 metadataTime.put(ShadowConst.DOC_KEY_TIMESTAMP, timestamp);
-                metadata.getDesired().put(attr, metadataTime);
-                doc.setMetadata(metadata);
+                doc.getMetadata().getDesired().put(sri, metadataTime);
             }
+
             // 更新时间戳
             doc.setTimestamp(timestamp);
             // 更新版本
             doc.addUpVersion();
+
+            log.warn(JSONObject.toJSONString(doc));
             return null;
         } finally {
             rwLock.writeLock().unlock();
@@ -197,11 +213,13 @@ public class ShadowBean<T> {
      * @Date 2019/4/30 17:15
      */
     private void shadowRevert() {
-        Map<String, Object> shadowAttr = doc.getState().getReported();
-        // 使用影子文档部分的数据覆盖影子对象
-        for (String key : shadowAttr.keySet()) {
-            ClassUtils.setValue(data, key, shadowAttr.get(key));
-        }
+        // TODO 影子版本回退 我不会写了 基本类型可以覆盖，对象不能
+        // 需要针对增、删、改进行不同的回退，对象还要考虑容器注入问题
+        ShadowEntity shadowAttr = doc.getState().getReported();
+//        // 使用影子文档部分的数据覆盖影子对象
+//        for (String key : shadowAttr.keySet()) {
+//            ClassUtils.setValue(data, key, shadowAttr.get(key));
+//        }
     }
 
     /**
@@ -210,39 +228,111 @@ public class ShadowBean<T> {
      * @author szh
      * @Date 2019/5/2 17:11
      */
-    private Map<String, Object> compareAttr() {
-        Map<String, Object> diffAttr = new HashMap<>(); // 不同的属性
-        Map<String, Object> attrDoc = doc.getState().getReported(); // 属性文档
+//    private Map<String, Object> compareAttr() {
+//        Map<String, Object> diffAttr = new HashMap<>(); // 不同的属性
+//        Map<String, Object> attrDoc = doc.getState().getReported(); // 属性文档
+//
+//        try {
+//            Class dataClass = data.getClass();
+//            Field[] fields = dataClass.getDeclaredFields();
+//            // 遍历影子所有属性
+//            for (Field f : fields) {
+//                f.setAccessible(true);
+//                // 获取影子值并转换为JSON
+//                String fieldName = f.getName();
+//                Object attrValue = f.get(data);
+//                String attrJson = JSONObject.toJSONString(attrValue);
+//                // 获取文档中属性并转换JSON
+//                boolean isDiff;
+//                Object docValue = attrDoc.get(fieldName);
+//                isDiff = docValue == null;
+//                if (null != docValue) {
+//                    String docJson = JSONObject.toJSONString(docValue);
+//                    // 对比文档属性异同
+//                    isDiff = !docJson.equals(attrJson);
+//                }
+//                if (isDiff) {
+//                    diffAttr.put(fieldName, attrValue);
+//                }
+//            }
+//        } catch (Exception e) {
+//            log.error("compareAttr error: " + e.getMessage());
+//            return new HashMap<>();
+//        }
+//
+//        return diffAttr;
+//    }
 
-        try {
-            Class dataClass = data.getClass();
-            Field[] fields = dataClass.getDeclaredFields();
-            // 遍历影子所有属性
-            for (Field f : fields) {
-                f.setAccessible(true);
-                // 获取影子值并转换为JSON
-                String fieldName = f.getName();
-                Object attrValue = f.get(data);
-                String attrJson = JSONObject.toJSONString(attrValue);
-                // 获取文档中属性并转换JSON
-                boolean isDiff;
-                Object docValue = attrDoc.get(fieldName);
-                isDiff = docValue == null;
-                if (null != docValue) {
-                    String docJson = JSONObject.toJSONString(docValue);
-                    // 对比文档属性异同
-                    isDiff = !docJson.equals(attrJson);
-                }
-                if (isDiff) {
-                    diffAttr.put(fieldName, attrValue);
-                }
+    /**
+     * @Description 比较实体的list
+     * @param entity 实体
+     * @param doc 影子文档
+     * @param entityNames 实体name
+     * @author szh
+     * @Date 2019/6/26 19:01
+     */
+    private void compareAttr(ShadowEntity entity, ShadowEntity doc, List<String> entityNames) {
+        Field[] fields = entity.getClass().getDeclaredFields();
+        for (Field f : fields) {
+            f.setAccessible(true);
+            String fieldType = f.getType().getSimpleName();
+            String fieldName = f.getName();
+            if ("List".equals(fieldType)) {
+                List<ShadowEntity> newList = (List<ShadowEntity>) ClassUtils.getValue(entity, fieldName);
+                List<ShadowEntity> oldList = (List<ShadowEntity>) ClassUtils.getValue(doc, fieldName);
+                compareList(newList, oldList, entity.getSRI());
+            } else if (entityNames.contains(fieldType)) {
+                ShadowEntity childEntity = (ShadowEntity) ClassUtils.getValue(entity, fieldName);
+                ShadowEntity childDoc = (ShadowEntity) ClassUtils.getValue(doc, fieldName);
+                compareAttr(childEntity, childDoc, entityNames);
             }
-        } catch (Exception e) {
-            log.error("compareAttr error: " + e.getMessage());
-            return new HashMap<>();
+        }
+    }
+
+    /**
+     * @Description 对比list变化
+     * @param newList 新list
+     * @param oldList 原list
+     * @param parentSri 父级sri
+     * @author szh
+     * @Date 2019/6/26 17:07
+     */
+    private void compareList(List<ShadowEntity> newList, List<ShadowEntity> oldList, String parentSri) {
+        if ((null == oldList || oldList.isEmpty()) && (null == newList || newList.isEmpty())) {
+            return;
         }
 
-        return diffAttr;
+        // 要删除的
+        List<ShadowEntity> toDelete = null;
+        // 要增加的
+        List<ShadowEntity> toAdd = null;
+
+        if ((null == oldList || oldList.isEmpty())) {
+            // 原list为空，新list有内容，则全部为新增
+            toAdd = newList;
+        } else if ((null == newList || newList.isEmpty())) {
+            // 新list为空，原list有内容，则全部删除
+            toDelete = oldList;
+        } else {
+            toDelete = oldList.stream().filter(item -> !newList.contains(item)).collect(Collectors.toList());
+            toAdd = newList.stream().filter(item -> !oldList.contains(item)).collect(Collectors.toList());
+        }
+
+        // 删除
+        if (null != toDelete) {
+            for (ShadowEntity entity : toDelete) {
+                ShadowField delField = new ShadowField(entity.getClass().getSimpleName(), entity.getSRI(), EntityOperation.DELETE);
+                shadowField.put(entity.getSRI(), delField);
+            }
+        }
+        // 增加
+        if (null != toAdd) {
+            for (ShadowEntity entity : toAdd) {
+                ShadowField addField = new ShadowField(entity.getClass().getSimpleName(), entity.getSRI(), parentSri,
+                        ClassUtils.getValueMap(entity), EntityOperation.ADD);
+                shadowField.put(entity.getSRI(), addField);
+            }
+        }
     }
 
 }
