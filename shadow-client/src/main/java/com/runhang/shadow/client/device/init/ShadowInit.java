@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class ShadowInit implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (autoInit) {
             Map<String, ShadowEntity> dataMap = new HashMap<>();
-            List<Vending> vendingList = vendingRepository.findAll();
+            List<Vending> vendingList = Collections.synchronizedList(vendingRepository.findAll());
             // 删除空的实体
             ShadowFactory.destroyEntities();
             // 注入影子和实体

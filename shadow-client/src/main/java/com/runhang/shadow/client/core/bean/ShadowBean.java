@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
@@ -332,6 +333,45 @@ public class ShadowBean {
                         ClassUtils.getValueMap(entity), EntityOperation.ADD);
                 shadowField.put(entity.getSRI(), addField);
             }
+        }
+    }
+
+
+    /**
+     * 读数据，可以多个线程同时读， 所以上读锁即可
+     */
+    public T get() {
+        /* 上读锁 */
+        rwLock.readLock().lock();
+        try {
+            return this.data;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            rwLock.readLock().unlock();
+        }
+        return null;
+    }
+
+
+    /**
+     * 写数据，多个线程不能同时 写 所以必须上写锁
+     *
+     * @param data
+     */
+    public void put(T data) {
+        /* 上写锁 */
+        rwLock.writeLock().lock();
+        try {
+            //System.out.println(Thread.currentThread().getName() + " 准备写数据!");
+            /* 休眠 */
+            TimeUnit.SECONDS.sleep(5);
+            this.data = data;
+            //System.out.println(Thread.currentThread().getName() + " 写入的数据: " + data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            rwLock.writeLock().unlock();
         }
     }
 
