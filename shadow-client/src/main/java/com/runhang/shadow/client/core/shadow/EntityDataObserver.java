@@ -1,6 +1,6 @@
 package com.runhang.shadow.client.core.shadow;
 
-import com.runhang.shadow.client.core.bean.ShadowBean;
+import com.runhang.shadow.client.core.bean.shadow.ShadowBean;
 import com.runhang.shadow.client.core.enums.EntityOperation;
 import com.runhang.shadow.client.core.model.DatabaseField;
 import com.runhang.shadow.client.core.model.EntityField;

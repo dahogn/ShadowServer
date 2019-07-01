@@ -1,5 +1,6 @@
-package com.runhang.shadow.client.core.bean;
+package com.runhang.shadow.client.core.bean.comm;
 
+import com.runhang.shadow.client.core.bean.shadow.ShadowDocMetadata;
 import lombok.Data;
 
 /**
@@ -18,9 +19,9 @@ public class RePayload {
     /** 回复内容 **/
     private ReContent content;
     /** 影子状态 **/
-    private ShadowDocData state;
+    private ShadowDocMetadata state;
     /** 影子元数据 **/
-    private ShadowDocData metadata;
+    private ShadowDocMetadata metadata;
 
     public RePayload() {
     }
@@ -35,7 +36,7 @@ public class RePayload {
         this.content = content;
     }
 
-    public RePayload(String status, ShadowDocData state, ShadowDocData metadata) {
+    public RePayload(String status, ShadowDocMetadata state, ShadowDocMetadata metadata) {
         this.status = status;
         this.state = state;
         this.metadata = metadata;

@@ -1,4 +1,4 @@
-package com.runhang.shadow.client.core.bean;
+package com.runhang.shadow.client.core.bean.comm;
 
 /**
  * 影子中的常量字段

@@ -1,4 +1,4 @@
-package com.runhang.shadow.client.core.bean;
+package com.runhang.shadow.client.core.bean.shadow;
 
 import com.runhang.shadow.client.core.model.ShadowField;
 import lombok.Data;

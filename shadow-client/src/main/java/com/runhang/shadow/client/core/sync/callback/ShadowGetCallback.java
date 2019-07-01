@@ -1,7 +1,7 @@
 package com.runhang.shadow.client.core.sync.callback;
 
-import com.runhang.shadow.client.core.bean.ShadowBean;
-import com.runhang.shadow.client.core.bean.ShadowOpsBean;
+import com.runhang.shadow.client.core.bean.shadow.ShadowBean;
+import com.runhang.shadow.client.core.bean.comm.ShadowOpsBean;
 import com.runhang.shadow.client.core.sync.push.GetReplyPush;
 
 /**

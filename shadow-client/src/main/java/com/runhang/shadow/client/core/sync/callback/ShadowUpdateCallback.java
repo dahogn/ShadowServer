@@ -1,8 +1,8 @@
 package com.runhang.shadow.client.core.sync.callback;
 
-import com.runhang.shadow.client.core.bean.ShadowBean;
-import com.runhang.shadow.client.core.bean.ShadowDoc;
-import com.runhang.shadow.client.core.bean.ShadowOpsBean;
+import com.runhang.shadow.client.core.bean.shadow.ShadowBean;
+import com.runhang.shadow.client.core.bean.shadow.ShadowDoc;
+import com.runhang.shadow.client.core.bean.comm.ShadowOpsBean;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
 import com.runhang.shadow.client.core.sync.push.UpdateReplyPush;
 

@@ -1,4 +1,4 @@
-package com.runhang.shadow.client.core.bean;
+package com.runhang.shadow.client.core.bean.shadow;
 
 import lombok.Data;
 
@@ -14,7 +14,7 @@ public class ShadowDoc {
     /** 影子状态 **/
     private ShadowDocState state;
     /** 影子元数据 **/
-    private ShadowDocData metadata;
+    private ShadowDocMetadata metadata;
     /** 最后修改时间戳 **/
     private long timestamp;
     /** 影子版本 **/
@@ -29,9 +29,9 @@ public class ShadowDoc {
         version += 1;
     }
 
-    public ShadowDocData getStateTrans() {
-        //return new ShadowDocData(state.getReported(), state.getDesired());
-        return new ShadowDocData();
+    public ShadowDocMetadata getStateTrans() {
+        //return new ShadowDocMetadata(state.getReported(), state.getDesired());
+        return new ShadowDocMetadata();
     }
 
 }

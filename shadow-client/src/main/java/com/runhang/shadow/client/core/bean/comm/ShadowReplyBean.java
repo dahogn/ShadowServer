@@ -1,4 +1,4 @@
-package com.runhang.shadow.client.core.bean;
+package com.runhang.shadow.client.core.bean.comm;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;

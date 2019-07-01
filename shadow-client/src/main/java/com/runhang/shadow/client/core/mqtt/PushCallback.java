@@ -1,8 +1,8 @@
 package com.runhang.shadow.client.core.mqtt;
 
 import com.alibaba.fastjson.JSONObject;
-import com.runhang.shadow.client.core.bean.ShadowConst;
-import com.runhang.shadow.client.core.bean.ShadowOpsBean;
+import com.runhang.shadow.client.core.bean.comm.ShadowConst;
+import com.runhang.shadow.client.core.bean.comm.ShadowOpsBean;
 import com.runhang.shadow.client.core.sync.callback.ShadowDeleteCallback;
 import com.runhang.shadow.client.core.sync.callback.ShadowGetCallback;
 import com.runhang.shadow.client.core.sync.callback.ShadowUpdateCallback;

@@ -1,7 +1,7 @@
 package com.runhang.shadow.client.core.sync.push;
 
-import com.runhang.shadow.client.core.bean.RePayload;
-import com.runhang.shadow.client.core.bean.ShadowReplyBean;
+import com.runhang.shadow.client.core.bean.comm.RePayload;
+import com.runhang.shadow.client.core.bean.comm.ShadowReplyBean;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 
 /**

@@ -1,7 +1,8 @@
-package com.runhang.shadow.client.core.bean;
+package com.runhang.shadow.client.core.bean.shadow;
 
 import com.alibaba.fastjson.JSONObject;
 import com.runhang.shadow.client.common.utils.ClassUtils;
+import com.runhang.shadow.client.core.bean.comm.ShadowConst;
 import com.runhang.shadow.client.core.enums.EntityOperation;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
 import com.runhang.shadow.client.core.model.ShadowField;
@@ -46,7 +47,7 @@ public class ShadowBean {
     public ShadowBean() {
         ShadowDoc doc = new ShadowDoc();
         doc.setState(new ShadowDocState());
-        doc.setMetadata(new ShadowDocData());
+        doc.setMetadata(new ShadowDocMetadata());
         setDoc(doc);
     }
 
@@ -105,9 +106,9 @@ public class ShadowBean {
                 // state
                 state.put(key, updateValue.get(key));
                 // metadata
-                ShadowDocData metadata = doc.getMetadata();
+                ShadowDocMetadata metadata = doc.getMetadata();
                 if (null == metadata) {
-                    metadata = new ShadowDocData();
+                    metadata = new ShadowDocMetadata();
                 }
                 Map<String, Object> metadataTime = new HashMap<>();
                 metadataTime.put(ShadowConst.DOC_KEY_TIMESTAMP, current);

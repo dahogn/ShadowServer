@@ -1,8 +1,8 @@
 package com.runhang.shadow.client.core.sync.push;
 
-import com.runhang.shadow.client.core.bean.RePayload;
-import com.runhang.shadow.client.core.bean.ShadowConst;
-import com.runhang.shadow.client.core.bean.ShadowDoc;
+import com.runhang.shadow.client.core.bean.comm.RePayload;
+import com.runhang.shadow.client.core.bean.comm.ShadowConst;
+import com.runhang.shadow.client.core.bean.shadow.ShadowDoc;
 import com.runhang.shadow.client.core.mqtt.TopicUtils;
 
 /**

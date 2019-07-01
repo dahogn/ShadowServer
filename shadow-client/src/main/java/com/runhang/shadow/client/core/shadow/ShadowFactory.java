@@ -2,7 +2,7 @@ package com.runhang.shadow.client.core.shadow;
 
 import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.common.utils.ClassUtils;
-import com.runhang.shadow.client.core.bean.ShadowBean;
+import com.runhang.shadow.client.core.bean.shadow.ShadowBean;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
 import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;

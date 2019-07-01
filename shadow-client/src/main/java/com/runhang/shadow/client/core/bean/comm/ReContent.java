@@ -1,4 +1,4 @@
-package com.runhang.shadow.client.core.bean;
+package com.runhang.shadow.client.core.bean.comm;
 
 import com.runhang.shadow.client.core.enums.ReErrorCode;
 import lombok.Data;
