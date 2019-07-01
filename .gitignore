@@ -1,5 +1,9 @@
 HELP.md
-/target/
+shadow-client/target/
+shadow-server/target/
+shadow-client/src/test/
+shadow-server/src/test/
+shadow-server/src/main/java/com/runhang/shadow/server/device/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
