@@ -1,6 +1,5 @@
 package com.runhang.shadow.client.core.bean.shadow;
 
-import com.alibaba.fastjson.JSONObject;
 import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.bean.comm.ShadowConst;
 import com.runhang.shadow.client.core.enums.EntityOperation;
@@ -238,47 +237,6 @@ public class ShadowBean {
 //            ClassUtils.setValue(data, key, shadowAttr.get(key));
 //        }
     }
-
-    /**
-     * @Description 对比属性不同
-     * @return 不同的属性名及其值
-     * @author szh
-     * @Date 2019/5/2 17:11
-     */
-//    private Map<String, Object> compareAttr() {
-//        Map<String, Object> diffAttr = new HashMap<>(); // 不同的属性
-//        Map<String, Object> attrDoc = doc.getState().getReported(); // 属性文档
-//
-//        try {
-//            Class dataClass = data.getClass();
-//            Field[] fields = dataClass.getDeclaredFields();
-//            // 遍历影子所有属性
-//            for (Field f : fields) {
-//                f.setAccessible(true);
-//                // 获取影子值并转换为JSON
-//                String fieldName = f.getName();
-//                Object attrValue = f.get(data);
-//                String attrJson = JSONObject.toJSONString(attrValue);
-//                // 获取文档中属性并转换JSON
-//                boolean isDiff;
-//                Object docValue = attrDoc.get(fieldName);
-//                isDiff = docValue == null;
-//                if (null != docValue) {
-//                    String docJson = JSONObject.toJSONString(docValue);
-//                    // 对比文档属性异同
-//                    isDiff = !docJson.equals(attrJson);
-//                }
-//                if (isDiff) {
-//                    diffAttr.put(fieldName, attrValue);
-//                }
-//            }
-//        } catch (Exception e) {
-//            log.error("compareAttr error: " + e.getMessage());
-//            return new HashMap<>();
-//        }
-//
-//        return diffAttr;
-//    }
 
     /**
      * @Description 比较实体的list

@@ -12,9 +12,7 @@
                 "timestamp":1561603988536
             }
         },
-        "reported":{
-
-        }
+        "reported":{}
     },
     "state":{
         "desired":{
@@ -48,7 +46,7 @@
     "version":1
 }
 ```
-2. 影子更新完成后发送到MQTT中
+2. 影子更新完成后发送到 get/${deviceTopic} 主题中
 ```json
 {
     "method": "control",
@@ -94,7 +92,7 @@
     "timestamp": 1561603988536
 }
 ```
-3. 设备端更新成功之后，上报最新状态到平台
+3. 设备端更新成功之后，上报最新状态到平台 update/${deviceTopic}
 ```json
 {
     "method":"update",
@@ -129,7 +127,7 @@
 }
 ```
 ### 三、设备主动上报状态
-1. 设备发送状态到影子服务器
+1. 设备发送状态到影子服务器 update/${deviceTopic}
 
 ```json
 {
@@ -199,3 +197,68 @@
 501|影子正在写入
 502|影子属性未修改
 503|服务端处理异常
+
+### 四、设备主动获取影子内容
+1. 设备发送请求到 update/${deviceTopic} 获取影子中的最新状态
+```json
+{
+    "method": "get"
+}
+```
+2. 服务器端下发影子状态到 get/${deviceTopic}
+```json
+{
+    "method":"reply",
+    "payload":{
+        "metadata":{
+            "desired":{
+                "Vending_1560758107221_553":{
+                    "timestamp":1561965731144
+                }
+            },
+            "reported":{}
+        },
+        "state":{
+            "desired":{
+                "add":[],
+                "delete":[],
+                "update":[
+                    {
+                        "className":"Vending",
+                        "field":{
+                            "name":"vending3"
+                        },
+                        "sri":"Vending_1560758107221_553"
+                    }
+                ]
+            },
+            "reported":{
+                "cargoRoad":[
+                    {
+                        "commodity":[
+                            {
+                                "id":1,
+                                "name":"可乐",
+                                "number":1,
+                                "price":1.1,
+                                "sri":"Commodity_1560758106907_511"
+                            }
+                        ],
+                        "id":1,
+                        "serial":1,
+                        "sri":"CargoRoad_1560758107239_367"
+                    }
+                ],
+                "id":1,
+                "name":"vending2",
+                "sri":"Vending_1560758107221_553",
+                "topic":"vending"
+            }
+        },
+        "status":"success",
+        "version":0
+    },
+    "timestamp":1561969659878,
+    "version":1
+}
+```

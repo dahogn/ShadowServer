@@ -1,14 +1,10 @@
 package com.runhang.shadow.client.device.init;
 
-import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.shadow.ShadowFactory;
-import com.runhang.shadow.client.device.entity.Commodity;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import com.runhang.shadow.client.device.entity.Vending;
-import com.runhang.shadow.client.device.repository.CargoRoadRepository;
-import com.runhang.shadow.client.device.repository.CommodityRepository;
-import com.runhang.shadow.client.device.repository.VendingRepository;
+import com.runhang.shadow.client.device.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
