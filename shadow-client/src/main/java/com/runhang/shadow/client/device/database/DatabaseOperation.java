@@ -26,7 +26,7 @@ public class DatabaseOperation {
     public static void saveEntity(ShadowEntity entity) {
         // 获取repository名
         String repositoryName = DatabaseUtils.generateRepositoryName(entity.getClass().getSimpleName());
-        if (!Character.isUpperCase(repositoryName.charAt(0))) {
+        if (Character.isUpperCase(repositoryName.charAt(0))) {
             repositoryName = Character.toLowerCase(repositoryName.charAt(0)) + repositoryName.substring(1);
         }
         try {

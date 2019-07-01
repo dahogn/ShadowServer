@@ -1,5 +1,7 @@
 package com.runhang.shadow.client.core.bean.shadow;
 
+import com.runhang.shadow.client.core.bean.comm.ReState;
+import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.Data;
 
 /**
@@ -29,9 +31,25 @@ public class ShadowDoc {
         version += 1;
     }
 
-    public ShadowDocMetadata getStateTrans() {
-        //return new ShadowDocMetadata(state.getReported(), state.getDesired());
-        return new ShadowDocMetadata();
+    /**
+     * @Description 获取用于返回的state
+     * @param dataClass 影子对象类型
+     * @return state
+     * @author szh
+     * @Date 2019/7/1 14:54
+     */
+    public ReState getAllStateTrans(Class<?> dataClass) {
+        return new ReState((ShadowEntity) state.getReported(dataClass), state.getDesired());
+    }
+
+    /**
+     * @Description 获取期望state
+     * @return state
+     * @author szh
+     * @Date 2019/7/1 15:15
+     */
+    public ReState getDesiredStateTrans() {
+        return new ReState(state.getDesired());
     }
 
 }

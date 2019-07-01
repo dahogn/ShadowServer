@@ -22,7 +22,7 @@ public class ControlPush extends MessagePush {
      * @Date 2019/5/3 21:14
      */
     public void push(String topic, ShadowDoc shadowDoc, long timestamp) {
-        RePayload rePayload = new RePayload(ShadowConst.PAYLOAD_STATUS_SUCCESS, shadowDoc.getStateTrans(), shadowDoc.getMetadata());
+        RePayload rePayload = new RePayload(ShadowConst.PAYLOAD_STATUS_SUCCESS, shadowDoc.getDesiredStateTrans(), shadowDoc.getMetadata());
         String publishTopic = TopicUtils.getGetTopic(topic);
         assembleAndPublish(ShadowConst.REPLY_METHOD_CONTROL, rePayload,
                 publishTopic, timestamp, shadowDoc.getVersion());

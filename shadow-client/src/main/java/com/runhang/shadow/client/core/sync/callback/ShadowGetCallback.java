@@ -20,7 +20,7 @@ public class ShadowGetCallback extends AbsMqttCallback {
 
     @Override
     public void dealMessage(ShadowOpsBean opsBean, ShadowBean shadowBean) {
-        getReplyPush.push(shadowBean.getTopic(), shadowBean.getDoc());
+        getReplyPush.push(shadowBean.getTopic(), shadowBean.getDoc(), shadowBean.getData().getClass());
     }
 
 }

@@ -1,6 +1,6 @@
 package com.runhang.shadow.client.core.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.runhang.shadow.client.core.enums.EntityOperation;
 import lombok.Data;
 
@@ -15,11 +15,16 @@ import java.util.Map;
 @Data
 public class ShadowField {
 
+    /** 类名 **/
     private String className;
-    private String sri; // 实体标识
-    private String parent;  // 父级sri
+    /** 实体标识 **/
+    private String sri;
+    /** 父级sri **/
+    private String parent;
+    /** 变化属性 **/
     private Map<String, Object> field;
-    @JsonIgnore
+    /** 变化操作（不序列化） **/
+    @JSONField(serialize = false)
     private EntityOperation operation;
 
     public ShadowField() {

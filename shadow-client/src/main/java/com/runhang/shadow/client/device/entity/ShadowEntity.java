@@ -1,5 +1,6 @@
 package com.runhang.shadow.client.device.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.runhang.shadow.client.core.model.DatabaseField;
 import com.runhang.shadow.client.core.shadow.ShadowFactory;
 import com.runhang.shadow.client.core.shadow.ShadowSubject;
@@ -27,12 +28,14 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
      * Shadow Resource Identifier
      * 影子资源标识符
      */
+    @JSONField(name = "sri")
     @Column(name = "sri")
     private String SRI;
 
     /**
      * 实体所属的影子对象的topic
      */
+    @JSONField(serialize = false)
     @Transient
     private String entityTopic;
 

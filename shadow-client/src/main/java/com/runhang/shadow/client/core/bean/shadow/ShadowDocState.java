@@ -20,8 +20,8 @@ public class ShadowDocState {
         desired = new ShadowDesiredDoc();
     }
 
-    public ShadowEntity getReported() {
-        return JSONObject.parseObject(reported, ShadowEntity.class);
+    public Object getReported(Class<?> dataClass) {
+        return JSONObject.parseObject(reported, dataClass);
     }
 
     public String getReportedStr() {

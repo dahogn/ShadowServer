@@ -1,5 +1,6 @@
 package com.runhang.shadow.client.core.bean.shadow;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.runhang.shadow.client.core.model.ShadowField;
 import lombok.Data;
 
@@ -28,6 +29,7 @@ public class ShadowDesiredDoc {
      * @author szh
      * @Date 2019/6/25 14:56
      */
+    @JSONField(serialize = false)
     public boolean isEmpty() {
         return add.isEmpty() && delete.isEmpty() && update.isEmpty();
     }

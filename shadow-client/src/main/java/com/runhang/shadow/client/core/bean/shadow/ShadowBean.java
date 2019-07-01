@@ -51,6 +51,22 @@ public class ShadowBean {
         setDoc(doc);
     }
 
+    public void setData(ShadowEntity data) {
+        this.data = data;
+        initDocState();
+    }
+    
+    /**
+     * @Description 初始化state中reported部分
+     * @author szh
+     * @Date 2019/7/1 14:08       
+     */
+    private void initDocState() {
+        if (null != data) {
+            doc.getState().setReported(data);
+        }
+    }
+
     /**
      * @Description 增加变更属性
      * @param field 属性信息
@@ -170,7 +186,7 @@ public class ShadowBean {
         try {
             // 对照list的变更
             List<String> entityNames = ClassUtils.getAllEntityName();
-            compareAttr(data, doc.getState().getReported(), entityNames);
+            compareAttr(data, (ShadowEntity) doc.getState().getReported(data.getClass()), entityNames);
             // 回退影子对象，当设备端修改成功之后才更改影子对象
             shadowRevert();
             // 更新文档
@@ -202,7 +218,6 @@ public class ShadowBean {
             // 更新版本
             doc.addUpVersion();
 
-            log.warn(JSONObject.toJSONString(doc));
             return null;
         } finally {
             rwLock.writeLock().unlock();
@@ -217,7 +232,7 @@ public class ShadowBean {
     private void shadowRevert() {
         // TODO 影子版本回退 我不会写了 基本类型可以覆盖，对象不能
         // 需要针对增、删、改进行不同的回退，对象还要考虑容器注入问题
-        ShadowEntity shadowAttr = doc.getState().getReported();
+        ShadowEntity shadowAttr = (ShadowEntity) doc.getState().getReported(data.getClass());
 //        // 使用影子文档部分的数据覆盖影子对象
 //        for (String key : shadowAttr.keySet()) {
 //            ClassUtils.setValue(data, key, shadowAttr.get(key));

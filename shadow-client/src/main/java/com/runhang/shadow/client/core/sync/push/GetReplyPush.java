@@ -17,11 +17,12 @@ public class GetReplyPush extends MessagePush {
      * @Description 推送属性
      * @param topic 主题
      * @param shadowDoc 影子文档
+     * @param dataClass 影子对象类型
      * @author szh
      * @Date 2019/5/3 21:14
      */
-    public void push(String topic, ShadowDoc shadowDoc) {
-        RePayload rePayload = new RePayload(ShadowConst.PAYLOAD_STATUS_SUCCESS, shadowDoc.getStateTrans(), shadowDoc.getMetadata());
+    public void push(String topic, ShadowDoc shadowDoc, Class<?> dataClass) {
+        RePayload rePayload = new RePayload(ShadowConst.PAYLOAD_STATUS_SUCCESS, shadowDoc.getAllStateTrans(dataClass), shadowDoc.getMetadata());
         String publishTopic = TopicUtils.getGetTopic(topic);
         assembleAndPublish(ShadowConst.REPLY_METHOD_REPLY, rePayload,
                 publishTopic, System.currentTimeMillis(), shadowDoc.getVersion());

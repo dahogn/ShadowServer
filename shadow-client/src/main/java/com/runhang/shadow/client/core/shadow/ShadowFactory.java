@@ -266,6 +266,8 @@ public class ShadowFactory {
         long current = System.currentTimeMillis();
         ReErrorCode error = shadowBean.updateShadowByServer(current);
         if (null == error) {
+            // 保存到数据库
+            DatabaseOperation.saveEntity(shadowBean.getData());
             // 下发状态
             controlPush.push(topic, shadowBean.getDoc(), current);
         }
