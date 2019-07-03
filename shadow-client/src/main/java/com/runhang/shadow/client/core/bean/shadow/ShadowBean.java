@@ -8,7 +8,7 @@ import com.runhang.shadow.client.core.exception.NoSriException;
 import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.model.ShadowField;
 import com.runhang.shadow.client.core.shadow.ShadowFactory;
-import com.runhang.shadow.client.device.database.DatabaseOperation;
+import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -173,7 +173,7 @@ public class ShadowBean {
             }
 
             /** step2 更新文档属性 **/
-            DatabaseOperation.saveEntity(data);
+            DatabaseQueue.amqpSave(data);
 
             /** step3 更新文档属性 **/
             // 序列化保存状态

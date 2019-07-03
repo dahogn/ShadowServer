@@ -8,8 +8,8 @@ import com.runhang.shadow.client.core.exception.NoSriException;
 import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 import com.runhang.shadow.client.core.mqtt.TopicUtils;
+import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
-import com.runhang.shadow.client.device.database.DatabaseOperation;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -278,7 +278,7 @@ public class ShadowFactory {
         ReErrorCode errorCode = shadowBean.updateShadowByServer(current);
         if (null == errorCode) {
             // 保存到数据库
-            DatabaseOperation.saveEntity(shadowBean.getData());
+            DatabaseQueue.amqpSave(shadowBean.getData());
         }
         return errorCode;
     }
@@ -296,7 +296,7 @@ public class ShadowFactory {
         ReErrorCode error = shadowBean.updateShadowByServer(current);
         if (null == error) {
             // 保存到数据库
-            DatabaseOperation.saveEntity(shadowBean.getData());
+            DatabaseQueue.amqpSave(shadowBean.getData());
             // 更新版本
             shadowBean.getDoc().addUpVersion();
             // 下发状态
