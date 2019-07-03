@@ -1,6 +1,8 @@
 package com.runhang.shadow.client.core.mqtt;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import com.runhang.shadow.client.core.bean.comm.ShadowConst;
 import com.runhang.shadow.client.core.bean.comm.ShadowOpsBean;
 import com.runhang.shadow.client.core.sync.callback.ShadowDeleteCallback;
@@ -44,7 +46,9 @@ public class PushCallback implements MqttCallbackExtended {
         log.info("接收消息内容 : " + msgContent);
 
         try {
-            ShadowOpsBean opsBean = JSONObject.parseObject(msgContent, ShadowOpsBean.class);
+            // 配置关闭BigDecimal，默认状态下FastJson会把小数转换成BigDecimal型
+            int disableDecimalFeature = JSON.DEFAULT_PARSER_FEATURE & ~Feature.UseBigDecimal.getMask();
+            ShadowOpsBean opsBean = JSONObject.parseObject(msgContent, ShadowOpsBean.class, disableDecimalFeature);
 
             // 根据要求选择回调方法
             switch (opsBean.getMethod()) {

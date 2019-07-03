@@ -5,8 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +54,15 @@ public class ClassUtils {
             Field field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
             field.set(obj, value);
+        } catch (NoSuchFieldException e) {
+            try {
+                Field field = clazz.getSuperclass().getDeclaredField(fieldName);
+                field.setAccessible(true);
+                field.set(obj, value);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return false;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -107,6 +114,66 @@ public class ClassUtils {
             log.error(e.getMessage());
         }
         return map;
+    }
+
+    /**
+     * @Description 删除list中元素
+     * @param obj 父对象
+     * @param fieldName list属性
+     * @param toDel 待删除元素
+     * @author szh
+     * @Date 2019/7/2 15:37
+     */
+    public static void listRemove(Object obj, String fieldName, Object toDel) {
+        try {
+            List<Object> list = (List<Object>) getValue(obj, fieldName);
+            if (null != list) {
+                list.remove(toDel);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    /**
+     * @Description 增加元素到list
+     * @param obj 父对象
+     * @param fieldName list属性
+     * @param toAdd 待增加元素
+     * @author szh
+     * @Date 2019/7/2 15:37
+     */
+    public static void listAdd(Object obj, String fieldName, Object toAdd) {
+        try {
+            List<Object> list = (List<Object>) getValue(obj, fieldName);
+            if (null != list) {
+                list.add(toAdd);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    /**
+     * @Description 新建并初始化实体
+     * @param className 实体类名
+     * @param field 属性值
+     * @return 实体
+     * @author szh
+     * @Date 2019/7/2 20:06
+     */
+    public static Object newEntity(String className, Map<String, Object> field) {
+        try {
+            Class clazz = Class.forName(ENTITY_PACKAGE_NAME + "." + className);
+            Object entity = clazz.newInstance();
+            for (String key : field.keySet()) {
+                setValue(entity, key, field.get(key));
+            }
+            return entity;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
     }
 
     /**

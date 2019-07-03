@@ -1,6 +1,5 @@
 package com.runhang.shadow.client.core.bean.comm;
 
-import com.runhang.shadow.client.core.bean.shadow.ShadowDocMetadata;
 import lombok.Data;
 
 /**
@@ -15,7 +14,7 @@ public class ShadowOpsBean {
     /** 操作类型 **/
     private String method;
     /** 设备状态 **/
-    private ShadowDocMetadata state;
+    private DeviceState state;
     /** 设备版本 **/
     private int version;
 

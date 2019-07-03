@@ -4,12 +4,14 @@ import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.bean.shadow.ShadowBean;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
+import com.runhang.shadow.client.core.exception.NoSriException;
 import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 import com.runhang.shadow.client.core.mqtt.TopicUtils;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
 import com.runhang.shadow.client.device.database.DatabaseOperation;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -38,6 +40,7 @@ public class ShadowFactory {
 
     private static ControlPush controlPush = new ControlPush();
 
+    /* ================================================== 影子注入 ================================================== */
     /**
      * 注入影子到容器
      *
@@ -90,8 +93,6 @@ public class ShadowFactory {
             return false;
         }
     }
-
-    /* ================================================== 影子注入 ================================================== */
 
     /**
      * @Description 注入影子到容器
@@ -162,6 +163,17 @@ public class ShadowFactory {
     /* ================================================== 实体注入 ================================================== */
 
     /**
+     * @Description 判断sri是否存在
+     * @param sri 实体sri
+     * @return 存在
+     * @author szh
+     * @Date 2019/7/2 15:05
+     */
+    public static boolean isSriExist(String sri) {
+        return entitySriSet.contains(sri);
+    }
+
+    /**
      * @Description 注入影子的各个部分
      * @param shadowEntity 影子部分实体
      * @throws NoTopicException 实体无主题异常
@@ -169,11 +181,14 @@ public class ShadowFactory {
      * @author szh
      * @Date 2019/6/16 19:51
      */
-    public static boolean injectEntity(ShadowEntity shadowEntity) throws NoTopicException {
-        if (null == shadowEntity.getEntityTopic() || "".equals(shadowEntity.getEntityTopic())) {
+    public static boolean injectEntity(ShadowEntity shadowEntity) throws NoTopicException, NoSriException {
+        if (StringUtils.isEmpty(shadowEntity.getEntityTopic())) {
             throw new NoTopicException();
         }
         String sri = shadowEntity.getSRI();
+        if (StringUtils.isEmpty(shadowEntity.getSRI())) {
+            throw new NoSriException();
+        }
         if (entitySriSet.contains(sri)) {
             return false;
         }
@@ -193,7 +208,7 @@ public class ShadowFactory {
      * @Date 2019/6/18 11:23
      */
     public static void injectEntities(ShadowEntity shadowEntity, String topic,
-                                      List<String> entityNames) throws NoTopicException {
+                                      List<String> entityNames) throws NoTopicException, NoSriException {
         // 注入自身
         shadowEntity.setEntityTopic(topic);
         injectEntity(shadowEntity);
@@ -234,6 +249,20 @@ public class ShadowFactory {
         entitySriSet.clear();
     }
 
+    /**
+     * @Description 通过sri获取实体
+     * @param sri sri
+     * @return 影子实体
+     * @author szh
+     * @Date 2019/7/2 15:11
+     */
+    public static ShadowEntity getEntity(String sri) {
+        if (!isSriExist(sri)) {
+            return null;
+        }
+        return (ShadowEntity) BeanUtils.getBean(sri);
+    }
+
     /* ================================================== 影子通信 ================================================== */
 
     /**
@@ -268,6 +297,8 @@ public class ShadowFactory {
         if (null == error) {
             // 保存到数据库
             DatabaseOperation.saveEntity(shadowBean.getData());
+            // 更新版本
+            shadowBean.getDoc().addUpVersion();
             // 下发状态
             controlPush.push(topic, shadowBean.getDoc(), current);
         }
@@ -288,6 +319,9 @@ public class ShadowFactory {
         if (shadowBean.getDoc().getState().getDesired().isEmpty()) {
             return ReErrorCode.SHADOW_ATTR_NOT_MODIFIED;
         }
+        // 更新版本
+        shadowBean.getDoc().addUpVersion();
+        // 下发
         long current = shadowBean.getDoc().getTimestamp();
         controlPush.push(topic, shadowBean.getDoc(), current);
         return null;
