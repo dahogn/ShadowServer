@@ -127,8 +127,8 @@
 }
 ```
 ### 三、设备主动上报状态
-1. 设备发送状态到影子服务器 update/${deviceTopic}
-
+1. 设备发送状态到影子服务器 update/${deviceTopic}  
+desired为null的时候表示设备端更新数据成功，清空服务器端的影子desired数据
 ```json
 {
     "method":"update",
@@ -136,16 +136,35 @@
         "reported":{
             "update":[
                 {
-                    "className":"Commodity",
-                    "sri":"Commodity_1560758106907_511",
-                    "parent":"CargoRoad_1560758107239_367",
+                    "className":"Vending",
+                    "sri":"Vending_1560758107221_553",
+                    "parent":"Vending_1560758107221_553",
                     "field":{
-                        "number":3
+                        "name":"vending4"
                     }
                 }
             ],
-            "delete":[],
-            "add":[]
+            "delete":[
+                {
+                    "className":"Commodity",
+                    "sri":"Commodity_1560758106907_511",
+                    "parent":"CargoRoad_1560758107239_367",
+                    "fieldName":"commodity"
+                }
+            ],
+            "add":[
+                {
+                    "className":"Commodity",
+                    "sri":"Commodity_1560758106907_222",
+                    "parent":"CargoRoad_1560758107239_367",
+                    "fieldName":"commodity",
+                    "field":{
+                        "number":2,
+                        "price":2.2,
+                        "name":"coffee"
+                    }
+                }
+            ]
         },
         "desired":null
     },
