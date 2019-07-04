@@ -4,14 +4,17 @@ import com.runhang.shadow.client.core.model.DatabaseField;
 import com.runhang.shadow.client.core.model.EntityField;
 
 import javax.persistence.*;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Entity
 public class Vending extends ShadowEntity {
 
+    @Transient
+    private static Map<String, DatabaseField> databaseFieldMap = new HashMap<>();
+
     static {
-        databaseFieldMap = new HashMap<>();
         databaseFieldMap.put("name", new DatabaseField("vending", "name"));
         databaseFieldMap.put("id", new DatabaseField("vending", "id"));
     }
@@ -19,13 +22,30 @@ public class Vending extends ShadowEntity {
     private String name;
 
     public void setName(String name) {
-        this.name = name;
-        EntityField field = new EntityField("Vending", "name", name);
-        notifyObservers(databaseFieldMap.get("name"), field);
+        /* 上写锁 */
+        lock.writeLock().lock();
+        try{
+            this.name = name;
+            EntityField field = new EntityField("Vending", "name", name);
+            notifyObservers(databaseFieldMap.get("name"), field);
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public String getName() {
-        return name;
+        /* 上读锁 */
+        lock.readLock().lock();
+        try {
+            return name;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.readLock().unlock();
+        }
+        return null;
     }
 
     private String topic;

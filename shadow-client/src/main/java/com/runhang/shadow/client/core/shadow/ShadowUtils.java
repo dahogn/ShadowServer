@@ -6,6 +6,8 @@ import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * @ClassName ShadowUtils
  * @Description 影子操作工具类
@@ -15,6 +17,11 @@ import com.runhang.shadow.client.device.entity.ShadowEntity;
 public class ShadowUtils {
 
     private static ControlPush controlPush = new ControlPush();
+
+    private static int SEMAPHORE = 1;
+
+    //门闩 控制获取影子对象
+    private static Semaphore semaphore = new Semaphore(SEMAPHORE);
 
     /**
      * @Description 获取影子对象
@@ -47,6 +54,7 @@ public class ShadowUtils {
             // 保存到数据库
             DatabaseQueue.amqpSave(shadowBean.getData());
         }
+        semaphore.release();
         return errorCode;
     }
 
