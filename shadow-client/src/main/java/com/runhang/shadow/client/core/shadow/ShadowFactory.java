@@ -9,10 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
 /**
+ * @author szh
  * @ClassName ShadowFactory
  * @Description 影子管理
  * @Date 2019/2/1 18:09
- * @author szh
  **/
 @Slf4j
 public class ShadowFactory {
@@ -74,10 +74,10 @@ public class ShadowFactory {
     }
 
     /**
-     * @Description 注入影子到容器
-     * @param data 管理对象
+     * @param data  管理对象
      * @param topic 订阅主题
      * @return 是否成功
+     * @Description 注入影子到容器
      * @author szh
      * @Date 2019/5/5 14:14
      */
@@ -94,9 +94,9 @@ public class ShadowFactory {
     }
 
     /**
-     * @Description 批量注入影子
      * @param dataMap 影子与主题
      * @return 是否成功
+     * @Description 批量注入影子
      * @author szh
      * @Date 2019/6/13 14:45
      */
