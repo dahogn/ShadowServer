@@ -1,15 +1,14 @@
 package com.runhang.shadow.client.common.utils;
 
+import cn.hutool.core.lang.ClassScaner;
+import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @ClassName ClassUtils
@@ -183,15 +182,19 @@ public class ClassUtils {
      * @Date 2019/6/18 10:34
      */
     public static List<String> getAllEntityName() {
-        List<String> fileNames = null;
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        String packagePath = ENTITY_PACKAGE_NAME.replace(".", "/");
-        URL url = loader.getResource(packagePath);
-        if (url != null) {
-            String type = url.getProtocol();
-            if ("file".endsWith(type)) {
-                fileNames = getClassNameByFile(url.getPath(), null, true);
-            }
+        List<String> fileNames = new ArrayList<>();
+//        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+//        String packagePath = ENTITY_PACKAGE_NAME.replace(".", "/");
+//        URL url = loader.getResource(packagePath);
+//        if (url != null) {
+//            String type = url.getProtocol();
+//            if ("file".endsWith(type)) {
+//                fileNames = getClassNameByFile(url.getPath(), null, true);
+//            }
+//        }
+        Set<Class<?>> classList = ClassScaner.scanPackageBySuper(ENTITY_PACKAGE_NAME, ShadowEntity.class);
+        for (Class clazz : classList) {
+            fileNames.add(clazz.getSimpleName());
         }
         return fileNames;
     }
