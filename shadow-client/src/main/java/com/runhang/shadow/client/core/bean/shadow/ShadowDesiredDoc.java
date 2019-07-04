@@ -19,7 +19,7 @@ public class ShadowDesiredDoc {
     /** 文档增加 */
     private List<ShadowField> add = new ArrayList<>();
     /** 删除文档，内容是对应实体的sri */
-    private List<String> delete = new ArrayList<>();
+    private List<ShadowField> delete = new ArrayList<>();
     /** 文档更新 */
     private List<ShadowField> update = new ArrayList<>();
 

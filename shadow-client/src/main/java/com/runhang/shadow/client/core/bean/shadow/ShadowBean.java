@@ -4,7 +4,11 @@ import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.bean.comm.ShadowConst;
 import com.runhang.shadow.client.core.enums.EntityOperation;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
+import com.runhang.shadow.client.core.exception.NoSriException;
+import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.model.ShadowField;
+import com.runhang.shadow.client.core.shadow.ShadowFactory;
+import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -97,51 +101,95 @@ public class ShadowBean {
      * @author szh
      * @Date 2019/5/2 15:55
      */
-    public ReErrorCode updateShadowByDevice(Map<String, Object> updateValue) {
-        /*// 判断是否加了写锁
+    public ReErrorCode updateShadowByDevice(ShadowDesiredDoc updateValue) throws NoSriException, NoTopicException {
+        // 判断是否加了写锁
         if (rwLock.isWriteLocked()) {
             return ReErrorCode.SHADOW_IS_WRITING;
         }
         rwLock.writeLock().lock();
         try {
-            // 更新影子属性
-            for (String key : updateValue.keySet()) {
-                boolean updateSuccess = ClassUtils.setValue(data, key, updateValue.get(key));
-                if (!updateSuccess) {
-                    // 影子属性回退
-                    shadowRevert();
-                    return ReErrorCode.SHADOW_ATTR_WRONG;
-                }
-            }
-            // 更新文档属性
+            /** step1: 更新影子属性 **/
+            // metadata
             long current = System.currentTimeMillis();
-            // 反序列化影子状态
-            Map<String, Object> state = doc.getState().getReported();
-            for (String key : updateValue.keySet()) {
-                // state
-                state.put(key, updateValue.get(key));
-                // metadata
-                ShadowDocMetadata metadata = doc.getMetadata();
-                if (null == metadata) {
-                    metadata = new ShadowDocMetadata();
-                }
-                Map<String, Object> metadataTime = new HashMap<>();
-                metadataTime.put(ShadowConst.DOC_KEY_TIMESTAMP, current);
-                metadata.getReported().put(key, metadataTime);
+            ShadowDocMetadata metadata = doc.getMetadata();
+            if (null == metadata) {
+                metadata = new ShadowDocMetadata();
                 doc.setMetadata(metadata);
             }
+
+            // 增加
+            for (ShadowField addField : updateValue.getAdd()) {
+                if (null != addField.getParent() && ShadowFactory.isSriExist(addField.getParent())) {
+                    ShadowEntity parentEntity = ShadowFactory.getEntity(addField.getParent());
+                    Map<String, Object> field = addField.getField();
+                    field.put("SRI", addField.getSri());
+                    field.put("entityTopic", topic);
+                    ShadowEntity entity = (ShadowEntity) ClassUtils.newEntity(addField.getClassName(), addField.getField());
+                    if (null != entity) {
+                        // data
+                        List<String> entityNames = ClassUtils.getAllEntityName();
+                        ShadowFactory.injectEntities(entity, topic, entityNames);
+                        ClassUtils.listAdd(parentEntity, addField.getFieldName(), entity);
+                        // metadata
+                        Map<String, Object> metadataTime = new HashMap<>();
+                        metadataTime.put(ShadowConst.DOC_KEY_TIMESTAMP, current);
+                        metadata.getReported().put(addField.getParent(), metadataTime);
+                    }
+                }
+            }
+            // 删除
+            for (ShadowField delField : updateValue.getDelete()) {
+                if (null != delField.getSri() && ShadowFactory.isSriExist(delField.getSri()) &&
+                        null != delField.getParent() && ShadowFactory.isSriExist(delField.getParent())) {
+                    // data
+                    ShadowEntity parentEntity = ShadowFactory.getEntity(delField.getParent());
+                    ShadowEntity delEntity = ShadowFactory.getEntity(delField.getSri());
+                    ClassUtils.listRemove(parentEntity, delField.getFieldName(), delEntity);
+                    // metadata
+                    Map<String, Object> metadataTime = new HashMap<>();
+                    metadataTime.put(ShadowConst.DOC_KEY_TIMESTAMP, current);
+                    metadata.getReported().put(delField.getParent(), metadataTime);
+                }
+            }
+            // 更新
+            for (ShadowField updateField : updateValue.getUpdate()) {
+                if (null != updateField.getSri() && ShadowFactory.isSriExist(updateField.getSri())) {
+                    ShadowEntity entity = ShadowFactory.getEntity(updateField.getSri());
+                    if (null != entity) {
+                        for (String fieldName : updateField.getField().keySet()) {
+                            boolean updateSuccess = ClassUtils.setValue(entity, fieldName, updateField.getField().get(fieldName));
+                            if (!updateSuccess) {
+                                // TODO 影子属性回退
+                                return ReErrorCode.SHADOW_ATTR_WRONG;
+                            } else {
+                                // metadata
+                                Map<String, Object> metadataTime = new HashMap<>();
+                                metadataTime.put(ShadowConst.DOC_KEY_TIMESTAMP, current);
+                                metadata.getReported().put(updateField.getSri(), metadataTime);
+                            }
+                        }
+                    }
+                }
+            }
+
+            /** step2 更新文档属性 **/
+            DatabaseQueue.amqpSave(data);
+
+            /** step3 更新文档属性 **/
             // 序列化保存状态
-            doc.getState().setReported(state);
+            doc.getState().setReported(data);
             // 更新时间戳
             doc.setTimestamp(current);
+
             return null;
+        } catch (NoTopicException | NoSriException e) {
+            throw e;
         } catch (Exception e) {
             log.error("影子更新失败：" + e.getMessage());
             return ReErrorCode.SERVER_ERROR;
         } finally {
             rwLock.writeLock().unlock();
-        }*/
-        return null;
+        }
     }
 
     /**
@@ -150,7 +198,7 @@ public class ShadowBean {
      * @author szh
      * @Date 2019/5/3 11:27
      */
-    public ReErrorCode updateShadowByDevice() {
+    public ReErrorCode clearDesired() {
         // 判断是否加了写锁
         if (rwLock.isWriteLocked()) {
             return ReErrorCode.SHADOW_IS_WRITING;
@@ -158,7 +206,9 @@ public class ShadowBean {
         rwLock.writeLock().lock();
         try {
             // 清空desire
-            doc.getState().setDesired(null);
+            doc.getState().getDesired().clearDesired();
+            // 清空变更
+            shadowField.clear();
             if (null != doc.getMetadata()) {
                 doc.getMetadata().getDesired().clear();
                 doc.getMetadata().getDesired().put(ShadowConst.DOC_KEY_TIMESTAMP, System.currentTimeMillis());
@@ -197,7 +247,7 @@ public class ShadowBean {
                         break;
 
                     case DELETE:
-                        doc.getState().getDesired().getDelete().add(sf.getSri());
+                        doc.getState().getDesired().getDelete().add(sf);
                         break;
 
                     case UPDATE:
@@ -255,7 +305,7 @@ public class ShadowBean {
             if ("List".equals(fieldType)) {
                 List<ShadowEntity> newList = (List<ShadowEntity>) ClassUtils.getValue(entity, fieldName);
                 List<ShadowEntity> oldList = (List<ShadowEntity>) ClassUtils.getValue(doc, fieldName);
-                compareList(newList, oldList, entity.getSRI());
+                compareList(newList, oldList, entity.getSRI(), fieldName);
             } else if (entityNames.contains(fieldType)) {
                 ShadowEntity childEntity = (ShadowEntity) ClassUtils.getValue(entity, fieldName);
                 ShadowEntity childDoc = (ShadowEntity) ClassUtils.getValue(doc, fieldName);
@@ -272,7 +322,7 @@ public class ShadowBean {
      * @author szh
      * @Date 2019/6/26 17:07
      */
-    private void compareList(List<ShadowEntity> newList, List<ShadowEntity> oldList, String parentSri) {
+    private void compareList(List<ShadowEntity> newList, List<ShadowEntity> oldList, String parentSri, String listName) {
         if ((null == oldList || oldList.isEmpty()) && (null == newList || newList.isEmpty())) {
             return;
         }
@@ -296,15 +346,16 @@ public class ShadowBean {
         // 删除
         if (null != toDelete) {
             for (ShadowEntity entity : toDelete) {
-                ShadowField delField = new ShadowField(entity.getClass().getSimpleName(), entity.getSRI(), EntityOperation.DELETE);
+                ShadowField delField = new ShadowField(entity.getClass().getSimpleName(), entity.getSRI(), listName,
+                        parentSri, EntityOperation.DELETE);
                 shadowField.put(entity.getSRI(), delField);
             }
         }
         // 增加
         if (null != toAdd) {
             for (ShadowEntity entity : toAdd) {
-                ShadowField addField = new ShadowField(entity.getClass().getSimpleName(), entity.getSRI(), parentSri,
-                        ClassUtils.getValueMap(entity), EntityOperation.ADD);
+                ShadowField addField = new ShadowField(entity.getClass().getSimpleName(), entity.getSRI(), listName,
+                        parentSri, ClassUtils.getValueMap(entity), EntityOperation.ADD);
                 shadowField.put(entity.getSRI(), addField);
             }
         }

@@ -2,6 +2,8 @@ package com.runhang.shadow.client.core.sync.callback;
 
 import com.runhang.shadow.client.core.bean.shadow.ShadowBean;
 import com.runhang.shadow.client.core.bean.comm.ShadowOpsBean;
+import com.runhang.shadow.client.core.exception.NoSriException;
+import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.mqtt.TopicUtils;
 import com.runhang.shadow.client.core.shadow.ShadowFactory;
 
@@ -20,7 +22,7 @@ public abstract class AbsMqttCallback {
      * @author szh
      * @Date 2019/4/29 16:28
      */
-    public void run(String topic, ShadowOpsBean opsBean) {
+    public void run(String topic, ShadowOpsBean opsBean) throws NoTopicException, NoSriException {
         // 取出容器中的对象
         String shadowId = TopicUtils.getShadowId(topic);
         ShadowBean shadowBean = ShadowFactory.getShadowBean(shadowId);
@@ -35,6 +37,6 @@ public abstract class AbsMqttCallback {
      * @author szh
      * @Date 2019/4/29 16:37
      */
-    public abstract void dealMessage(ShadowOpsBean opsBean, ShadowBean shadowBean);
+    public abstract void dealMessage(ShadowOpsBean opsBean, ShadowBean shadowBean)  throws NoTopicException, NoSriException;
 
 }

@@ -1,9 +1,10 @@
-package com.runhang.shadow.client.device.database;
+package com.runhang.shadow.client.core.sync.database;
 
 import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.common.utils.DatabaseUtils;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,7 +24,7 @@ public class DatabaseOperation {
      * @author szh
      * @Date 2019/6/27 22:26
      */
-    public static void saveEntity(ShadowEntity entity) {
+    static void saveEntity(ShadowEntity entity) {
         // 获取repository名
         String repositoryName = DatabaseUtils.generateRepositoryName(entity.getClass().getSimpleName());
         if (Character.isUpperCase(repositoryName.charAt(0))) {

@@ -1,12 +1,13 @@
 package com.runhang.shadow.client.core.sync.callback;
 
 import com.runhang.shadow.client.core.bean.shadow.ShadowBean;
+import com.runhang.shadow.client.core.bean.shadow.ShadowDesiredDoc;
 import com.runhang.shadow.client.core.bean.shadow.ShadowDoc;
 import com.runhang.shadow.client.core.bean.comm.ShadowOpsBean;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
+import com.runhang.shadow.client.core.exception.NoSriException;
+import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.sync.push.UpdateReplyPush;
-
-import java.util.Map;
 
 /**
  * @ClassName ShadowUpdateCallback
@@ -23,7 +24,7 @@ public class ShadowUpdateCallback extends AbsMqttCallback {
     }
 
     @Override
-    public void dealMessage(ShadowOpsBean opsBean, ShadowBean shadowBean) {
+    public void dealMessage(ShadowOpsBean opsBean, ShadowBean shadowBean) throws NoTopicException, NoSriException {
         int deviceVer = opsBean.getVersion();
         int shadowVer = shadowBean.getDoc().getVersion();
 
@@ -36,20 +37,22 @@ public class ShadowUpdateCallback extends AbsMqttCallback {
         ShadowDoc shadowDoc = shadowBean.getDoc();
         // 设备状态更新成功，清除desired
         if (null == opsBean.getState().getDesired()) {
-            ReErrorCode error = shadowBean.updateShadowByDevice();
+            ReErrorCode error = shadowBean.clearDesired();
             if (null != error) {
                 // 推送写锁错误
                 updateReplyPush.pushError(shadowBean.getTopic(), error);
+                return;
             }
         }
         // 更新影子
-        Map<String, Object> reportedValue = opsBean.getState().getReported();
+        ShadowDesiredDoc reportedValue = opsBean.getState().getReported();
         if (null != reportedValue) {
             // 更新影子属性
             ReErrorCode error = shadowBean.updateShadowByDevice(reportedValue);
             if (null != error) {
                 // 推送属性错误信息
                 updateReplyPush.pushError(shadowBean.getTopic(), error);
+                return;
             }
         }
         // 更新版本号

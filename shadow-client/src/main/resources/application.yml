@@ -3,7 +3,7 @@ server:
   tomcat:
     uri-encoding: utf-8
 
-#MySQL
+# MySQL
 spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
@@ -21,14 +21,20 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5Dialect
+# amqp
+  rabbitmq:
+    host: 47.92.228.54
+    port: 5672
+    username: shengzeznkj
+    password: szznkj
 
-#mqtt
+# mqtt
 com:
   mqtt:
-    host: 192.168.0.106
+    host: 47.92.228.54
     port: 1883
-    username: guest
-    password: guest
+    username: shengzeznkj
+    password: szznkj
     timeout: 60
     keepAlive: 180
     preFix: 'tcp://'
