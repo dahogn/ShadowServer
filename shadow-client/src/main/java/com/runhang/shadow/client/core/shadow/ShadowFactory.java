@@ -1,22 +1,11 @@
 package com.runhang.shadow.client.core.shadow;
 
 import com.runhang.shadow.client.common.utils.BeanUtils;
-import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.bean.shadow.ShadowBean;
-import com.runhang.shadow.client.core.enums.ReErrorCode;
-import com.runhang.shadow.client.core.exception.NoSriException;
-import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 import com.runhang.shadow.client.core.mqtt.TopicUtils;
-import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
-import com.runhang.shadow.client.core.sync.push.ControlPush;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Field;
+import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
 /**
@@ -25,22 +14,12 @@ import java.util.*;
  * @Date 2019/2/1 18:09
  * @author szh
  **/
-@Component
+@Slf4j
 public class ShadowFactory {
 
-    private static Logger log = LoggerFactory.getLogger(ShadowFactory.class);
-    /**
-     * 保存影子topic与容器id关系
-     */
+    /** 保存影子topic与容器id关系 */
     private static Map<String, String> beanMap = new HashMap<>();
-    /**
-     * 保存实体的SRI
-     */
-    private static Set<String> entitySriSet = new HashSet<>();
 
-    private static ControlPush controlPush = new ControlPush();
-
-    /* ================================================== 影子注入 ================================================== */
     /**
      * 注入影子到容器
      *
@@ -142,189 +121,6 @@ public class ShadowFactory {
     public static ShadowBean getShadowBean(String topic) {
         // TODO 通过索引和类名两种方式检索
         return (ShadowBean) BeanUtils.getBean(beanMap.get(topic));
-    }
-
-    /**
-     * @Description 获取影子对象
-     * @param topic 主题
-     * @return 对象
-     * @author szh
-     * @Date 2019/5/2 20:46
-     */
-    public static Object getShadow(String topic) {
-        ShadowBean shadowBean = getShadowBean(topic);
-        if (null != shadowBean) {
-            return shadowBean.getData();
-        } else {
-            return null;
-        }
-    }
-
-    /* ================================================== 实体注入 ================================================== */
-
-    /**
-     * @Description 判断sri是否存在
-     * @param sri 实体sri
-     * @return 存在
-     * @author szh
-     * @Date 2019/7/2 15:05
-     */
-    public static boolean isSriExist(String sri) {
-        return entitySriSet.contains(sri);
-    }
-
-    /**
-     * @Description 注入影子的各个部分
-     * @param shadowEntity 影子部分实体
-     * @throws NoTopicException 实体无主题异常
-     * @return 是否成功
-     * @author szh
-     * @Date 2019/6/16 19:51
-     */
-    public static boolean injectEntity(ShadowEntity shadowEntity) throws NoTopicException, NoSriException {
-        if (StringUtils.isEmpty(shadowEntity.getEntityTopic())) {
-            throw new NoTopicException();
-        }
-        String sri = shadowEntity.getSRI();
-        if (StringUtils.isEmpty(shadowEntity.getSRI())) {
-            throw new NoSriException();
-        }
-        if (entitySriSet.contains(sri)) {
-            return false;
-        }
-        entitySriSet.add(sri);
-        BeanUtils.injectExistBean(shadowEntity, sri);
-        // 增加订阅
-        shadowEntity.addObserver(new EntityDataObserver(shadowEntity.getEntityTopic(), sri));
-        return true;
-    }
-
-    /**
-     * @Description 递归注入所有实体
-     * @param shadowEntity 实体
-     * @param topic 主题
-     * @param entityNames 所有实体类名
-     * @author szh
-     * @Date 2019/6/18 11:23
-     */
-    public static void injectEntities(ShadowEntity shadowEntity, String topic,
-                                      List<String> entityNames) throws NoTopicException, NoSriException {
-        // 注入自身
-        shadowEntity.setEntityTopic(topic);
-        injectEntity(shadowEntity);
-        // 获取所有属性类型
-        Class entityClass = shadowEntity.getClass();
-        Field[] fields = entityClass.getDeclaredFields();
-
-        for (Field field : fields) {
-            field.setAccessible(true);
-            String fieldType = field.getType().getSimpleName();
-            if (entityNames.contains(fieldType)) {
-                // 如果是实体直接注入
-                ShadowEntity shadowField = (ShadowEntity) ClassUtils.getValue(shadowEntity, field.getName());
-                if (null != shadowField) {
-                    injectEntities(shadowField, topic, entityNames);
-                }
-            } else if ("List".equals(fieldType)) {
-                // 如果是list，遍历注入
-                List<ShadowEntity> shadowFields = (List<ShadowEntity>) ClassUtils.getValue(shadowEntity, field.getName());
-                if (null != shadowFields) {
-                    for (ShadowEntity shadowField : shadowFields) {
-                        injectEntities(shadowField, topic, entityNames);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @Description 清空实体
-     * @author szh
-     * @Date 2019/6/18 0:09
-     */
-    public static void destroyEntities() {
-        for (String beanName : entitySriSet) {
-            BeanUtils.destroyBean(beanName);
-        }
-        entitySriSet.clear();
-    }
-
-    /**
-     * @Description 通过sri获取实体
-     * @param sri sri
-     * @return 影子实体
-     * @author szh
-     * @Date 2019/7/2 15:11
-     */
-    public static ShadowEntity getEntity(String sri) {
-        if (!isSriExist(sri)) {
-            return null;
-        }
-        return (ShadowEntity) BeanUtils.getBean(sri);
-    }
-
-    /* ================================================== 影子通信 ================================================== */
-
-    /**
-     * @Description 通过主题更新影子文档
-     * @param topic 主题
-     * @return 是否成功
-     * @author szh
-     * @Date 2019/5/9 10:46
-     */
-    public static ReErrorCode commit(String topic) {
-        ShadowBean shadowBean = getShadowBean(topic);
-        long current = System.currentTimeMillis();
-        ReErrorCode errorCode = shadowBean.updateShadowByServer(current);
-        if (null == errorCode) {
-            // 保存到数据库
-            DatabaseQueue.amqpSave(shadowBean.getData());
-        }
-        return errorCode;
-    }
-
-    /**
-     * @Description 通过主题更新影子文档并下发
-     * @param topic 主题
-     * @return 是否成功
-     * @author szh
-     * @Date 2019/5/2 16:17
-     */
-    public static ReErrorCode commitAndPush(String topic) {
-        ShadowBean shadowBean = getShadowBean(topic);
-        long current = System.currentTimeMillis();
-        ReErrorCode error = shadowBean.updateShadowByServer(current);
-        if (null == error) {
-            // 保存到数据库
-            DatabaseQueue.amqpSave(shadowBean.getData());
-            // 更新版本
-            shadowBean.getDoc().addUpVersion();
-            // 下发状态
-            controlPush.push(topic, shadowBean.getDoc(), current);
-        }
-
-        return error;
-    }
-
-    /**
-     * @Description 下发影子修改
-     * @param topic 主题
-     * @return 是否成功
-     * @author szh
-     * @Date 2019/5/9 10:44
-     */
-    public static ReErrorCode push(String topic) {
-        ShadowBean shadowBean = getShadowBean(topic);
-        // 检查是否修改
-        if (shadowBean.getDoc().getState().getDesired().isEmpty()) {
-            return ReErrorCode.SHADOW_ATTR_NOT_MODIFIED;
-        }
-        // 更新版本
-        shadowBean.getDoc().addUpVersion();
-        // 下发
-        long current = shadowBean.getDoc().getTimestamp();
-        controlPush.push(topic, shadowBean.getDoc(), current);
-        return null;
     }
 
 }

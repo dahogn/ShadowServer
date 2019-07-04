@@ -2,7 +2,7 @@ package com.runhang.shadow.client.device.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.runhang.shadow.client.core.model.DatabaseField;
-import com.runhang.shadow.client.core.shadow.ShadowFactory;
+import com.runhang.shadow.client.core.shadow.EntityFactory;
 import com.runhang.shadow.client.core.shadow.ShadowSubject;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,7 +57,7 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
     public ShadowEntity(String topic) throws Exception {
         super();
         this.SRI = generateSRI();
-        boolean injectRe = ShadowFactory.injectEntity(this);
+        boolean injectRe = EntityFactory.injectEntity(this);
         //log.info("inject " + SRI + ": " + injectRe);
         this.entityTopic =  topic;
     }

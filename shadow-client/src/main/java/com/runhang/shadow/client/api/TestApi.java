@@ -2,7 +2,7 @@ package com.runhang.shadow.client.api;
 
 import com.runhang.shadow.client.core.enums.ReErrorCode;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
-import com.runhang.shadow.client.core.shadow.ShadowFactory;
+import com.runhang.shadow.client.core.shadow.ShadowUtils;
 import com.runhang.shadow.client.device.entity.Vending;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +39,10 @@ public class TestApi {
 
     @RequestMapping("modify")
     public String modify() {
-        Vending vending = (Vending) ShadowFactory.getShadow("vending");
+        Vending vending = (Vending) ShadowUtils.getShadow("vending");
         if (null != vending) {
             vending.setName("vending3");
-            ReErrorCode error = ShadowFactory.commitAndPush("vending");
+            ReErrorCode error = ShadowUtils.commitAndPush("vending");
             if (null != error) {
                 log.error(error.getErrorMsg());
             }
