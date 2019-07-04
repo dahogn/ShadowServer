@@ -12,8 +12,10 @@ import java.util.Map;
 @Entity
 public class Commodity extends ShadowEntity {
 
+    @Transient
+    private static Map<String, DatabaseField> databaseFieldMap = new HashMap<>();
+
     static {
-        databaseFieldMap = new HashMap<>();
         databaseFieldMap.put("number", new DatabaseField("re_road_commodity", "number"));
         databaseFieldMap.put("price", new DatabaseField("commodity", "price"));
         databaseFieldMap.put("name", new DatabaseField("commodity", "name"));

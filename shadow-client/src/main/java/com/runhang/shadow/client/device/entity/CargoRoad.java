@@ -10,8 +10,10 @@ import java.util.Map;
 @Entity
 public class CargoRoad extends ShadowEntity {
 
+    @Transient
+    private static Map<String, DatabaseField> databaseFieldMap = new HashMap<>();
+
     static {
-        databaseFieldMap = new HashMap<>();
         databaseFieldMap.put("serial", new DatabaseField("cargo_road", "serial"));
         databaseFieldMap.put("id", new DatabaseField("cargo_road", "id"));
     }

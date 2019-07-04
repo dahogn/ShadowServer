@@ -5,10 +5,13 @@ import com.runhang.shadow.client.core.model.DatabaseField;
 import com.runhang.shadow.client.core.shadow.ShadowFactory;
 import com.runhang.shadow.client.core.shadow.ShadowSubject;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @ClassName ShadowEntity
@@ -19,6 +22,8 @@ import java.util.Map;
 @Slf4j
 @MappedSuperclass
 public class ShadowEntity extends ShadowSubject implements Serializable {
+    @Transient
+    ReadWriteLock lock = new ReentrantReadWriteLock();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,11 +44,6 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
     @Transient
     private String entityTopic;
 
-    /**
-     * 数据库字段映射关系
-     */
-    @Transient
-    public static Map<String, DatabaseField> databaseFieldMap;
 
     ShadowEntity() {
 

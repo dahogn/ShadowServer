@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 
 /**
  * @ClassName ShadowFactory
@@ -25,8 +27,13 @@ import java.util.*;
  **/
 @Component
 public class ShadowFactory {
+    private static int SEMAPHORE = 1;
 
     private static Logger log = LoggerFactory.getLogger(ShadowFactory.class);
+
+    //门闩 控制获取影子对象
+    private static Semaphore semaphore = new Semaphore(SEMAPHORE);
+
     /**
      * 保存影子topic与容器id关系
      */
@@ -151,7 +158,9 @@ public class ShadowFactory {
      * @Date 2019/5/2 20:46
      */
     public static Object getShadow(String topic) {
+
         ShadowBean shadowBean = getShadowBean(topic);
+        //判读是否有用getShadow的
         if (null != shadowBean) {
             return shadowBean.getData();
         } else {
@@ -251,6 +260,7 @@ public class ShadowFactory {
             // 保存到数据库
             DatabaseOperation.saveEntity(shadowBean.getData());
         }
+        semaphore.release();
         return errorCode;
     }
 
@@ -271,7 +281,6 @@ public class ShadowFactory {
             // 下发状态
             controlPush.push(topic, shadowBean.getDoc(), current);
         }
-
         return error;
     }
 
