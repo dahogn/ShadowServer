@@ -1,11 +1,15 @@
 package com.runhang.shadow.client.core.shadow;
 
+import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.bean.shadow.ShadowBean;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
+import com.runhang.shadow.client.core.exception.NoSriException;
+import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -22,6 +26,25 @@ public class ShadowUtils {
 
     //门闩 控制获取影子对象
     private static Semaphore semaphore = new Semaphore(SEMAPHORE);
+
+    /**
+     * @Description 增加影子对象
+     * @param data 影子对象
+     * @param topic 主题
+     * @return 是否成功
+     * @author szh
+     * @Date 2019/7/5 9:22
+     */
+    public static boolean addShadow(ShadowEntity data, String topic) throws NoTopicException, NoSriException {
+        // 注入影子
+        boolean shadowSuccess = ShadowFactory.injectShadow(data, topic);
+        // 注入实体
+        if (shadowSuccess) {
+            List<String> entityNames = ClassUtils.getAllEntityName();
+            EntityFactory.injectEntities(data, topic, entityNames);
+        }
+        return shadowSuccess;
+    }
 
     /**
      * @Description 获取影子对象
