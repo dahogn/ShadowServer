@@ -8,9 +8,12 @@ import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
+import sun.security.smartcardio.SunPCSC;
 
+import javax.sound.midi.Soundbank;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @ClassName ShadowUtils
@@ -21,11 +24,6 @@ import java.util.concurrent.Semaphore;
 public class ShadowUtils {
 
     private static ControlPush controlPush = new ControlPush();
-
-    private static int SEMAPHORE = 1;
-
-    //门闩 控制获取影子对象
-    private static Semaphore semaphore = new Semaphore(SEMAPHORE);
 
     /**
      * @Description 增加影子对象
@@ -53,13 +51,25 @@ public class ShadowUtils {
      * @author szh
      * @Date 2019/5/2 20:46
      */
-    public static ShadowEntity getShadow(String topic) {
+    public static synchronized ShadowEntity getShadow(String topic) {
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
-        if (null != shadowBean) {
-            return shadowBean.getData();
-        } else {
+        Semaphore semaphore = ShadowFactory.getSemaphore(topic);
+        System.out.println(Thread.currentThread().getName() + " 信号量余量 " + semaphore.availablePermits());
+        try{
+            if (null != shadowBean && null != semaphore) {
+                while (!semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)){
+                    ShadowUtils.class.wait();
+                }
+                return shadowBean.getData();
+            } else {
+                return null;
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+            semaphore.release();
             return null;
         }
+
     }
 
     /**
@@ -69,7 +79,7 @@ public class ShadowUtils {
      * @author szh
      * @Date 2019/5/9 10:46
      */
-    public static ReErrorCode commit(String topic) {
+    public static synchronized ReErrorCode commit(String topic) {
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
         long current = System.currentTimeMillis();
         ReErrorCode errorCode = shadowBean.updateShadowByServer(current);
@@ -77,7 +87,9 @@ public class ShadowUtils {
             // 保存到数据库
             DatabaseQueue.amqpSave(shadowBean.getData());
         }
+        Semaphore semaphore = ShadowFactory.getSemaphore(topic);
         semaphore.release();
+        ShadowUtils.class.notifyAll();
         return errorCode;
     }
 
@@ -88,7 +100,7 @@ public class ShadowUtils {
      * @author szh
      * @Date 2019/5/2 16:17
      */
-    public static ReErrorCode commitAndPush(String topic) {
+    public static synchronized ReErrorCode commitAndPush(String topic) {
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
         long current = System.currentTimeMillis();
         ReErrorCode error = shadowBean.updateShadowByServer(current);
@@ -100,7 +112,9 @@ public class ShadowUtils {
             // 下发状态
             controlPush.push(topic, shadowBean.getDoc(), current);
         }
-
+        Semaphore semaphore = ShadowFactory.getSemaphore(topic);
+        semaphore.release();
+        ShadowUtils.class.notifyAll();
         return error;
     }
 

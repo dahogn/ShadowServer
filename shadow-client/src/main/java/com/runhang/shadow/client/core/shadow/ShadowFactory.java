@@ -7,6 +7,7 @@ import com.runhang.shadow.client.core.mqtt.TopicUtils;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.extern.slf4j.Slf4j;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 /**
  * @author szh
@@ -19,6 +20,8 @@ public class ShadowFactory {
 
     /** 保存影子topic与容器id关系 */
     private static Map<String, String> beanMap = new HashMap<>();
+    /** 保存影子的信号量*/
+    private static Map<String, Semaphore> semaphoreMap = new HashMap<>();
 
     /**
      * 注入影子到容器
@@ -37,6 +40,8 @@ public class ShadowFactory {
         /** 2. bean注入 **/
         String beanName = bean.getData().getClass().getSimpleName() + "_" + topic;
         beanMap.put(topic, beanName);
+        // 标注信号量
+        semaphoreMap.put(topic,new Semaphore(1));
         BeanUtils.injectExistBean(bean, beanName);
         /** 3. mqtt订阅 **/
         MqttTopicFactory mqttTopicFactory = new MqttTopicFactory();
@@ -121,6 +126,15 @@ public class ShadowFactory {
     public static ShadowBean getShadowBean(String topic) {
         // TODO 通过索引和类名两种方式检索
         return (ShadowBean) BeanUtils.getBean(beanMap.get(topic));
+    }
+
+    /**
+     * 获取信号量
+     * @param topic
+     * @return
+     */
+    public static Semaphore getSemaphore(String topic){
+        return semaphoreMap.get(topic);
     }
 
 }
