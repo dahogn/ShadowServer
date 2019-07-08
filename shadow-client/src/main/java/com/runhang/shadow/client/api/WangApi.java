@@ -1,7 +1,7 @@
 package com.runhang.shadow.client.api;
 
 import com.runhang.shadow.client.core.enums.ReErrorCode;
-import com.runhang.shadow.client.core.shadow.ShadowFactory;
+import com.runhang.shadow.client.core.shadow.ShadowUtils;
 import com.runhang.shadow.client.device.entity.CargoRoad;
 import com.runhang.shadow.client.device.entity.Vending;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +21,7 @@ public class WangApi {
 
     @GetMapping("/test")
     public String test(){
-        Vending vending = (Vending)ShadowFactory.getShadow("test");
+        Vending vending = (Vending) ShadowUtils.getShadow("test");
         // 开启三个线程，修改vendor的属性查看是否异常
         new Thread(() -> {
             try {
@@ -71,14 +71,14 @@ public class WangApi {
     @GetMapping("/semaphore")
     public String semaphore(){
         new Thread(() -> {
-            Vending vending = (Vending) ShadowFactory.getShadow("test");
-            Vending vending2 = (Vending) ShadowFactory.getShadow("test");
+            Vending vending = (Vending) ShadowUtils.getShadow("test");
+            //Vending vending2 = (Vending) ShadowUtils.getShadow("test");
             System.out.println(vending);
-            System.out.println(vending2);
-            System.out.println(vending.equals(vending2));
+           // System.out.println(vending2);
+           // System.out.println(vending.equals(vending2));
 
             List<CargoRoad> list = vending.getCargoRoad();
-            System.out.println(Thread.currentThread().getName()+" "+ list.size());
+            System.out.println(Thread.currentThread().getName()+" 子类的长度 "+ list.size());
             if (list.size() > 0){
                 try {
                     TimeUnit.SECONDS.sleep(3);
@@ -87,29 +87,32 @@ public class WangApi {
                 }
                 list.remove(0);
             }
-            System.out.println(Thread.currentThread().getName()+" "+ list.size());
-            ReErrorCode error = ShadowFactory.commitAndPush("test");
+            System.out.println(Thread.currentThread().getName()+" 子类的长度 "+ list.size());
+            ReErrorCode error = ShadowUtils.commitAndPush("test");
             if (null != error) {
                 System.out.println(error.getErrorMsg());
             }
-            Vending vending1 = (Vending) ShadowFactory.getShadow("test");
-            System.out.println(Thread.currentThread().getName()+" "+ vending1.getCargoRoad().size());
+            Vending vending1 = (Vending) ShadowUtils.getShadow("test");
+            System.out.println(Thread.currentThread().getName()+" 子类的长度 "+ vending1.getCargoRoad().size());
+            ShadowUtils.commit("test");
+            System.out.println(Thread.currentThread().getName() + "end");
         }, "修改线程" + 1).start();
 
         new Thread(() -> {
-            Vending vending = (Vending) ShadowFactory.getShadow("test");
+            Vending vending = (Vending) ShadowUtils.getShadow("test");
             if (vending != null){
                 List<CargoRoad> list = vending.getCargoRoad();
-                System.out.println(Thread.currentThread().getName()+" "+ list.size());
+                System.out.println(Thread.currentThread().getName()+" 子类的长度 "+ list.size());
                 if (list.size() > 0){
                     list.remove(0);
                 }
-                System.out.println(Thread.currentThread().getName()+" "+ list.size());
-                ReErrorCode error = ShadowFactory.commitAndPush("test");
+                System.out.println(Thread.currentThread().getName()+" 子类的长度 "+ list.size());
+                ReErrorCode error = ShadowUtils.commitAndPush("test");
                 if (null != error) {
                     System.out.println(error.getErrorMsg());
                 }
             }
+            System.out.println(Thread.currentThread().getName() + "end");
         }, "修改线程" + 2).start();
 
         return "success";
