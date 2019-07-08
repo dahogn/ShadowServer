@@ -129,18 +129,18 @@ public class ParseXMLUtils {
             /** step 2. 生成实体代码 */
             for (String className : entityAttr.keySet()) {
                 EntityDetail entityDetail = entityAttr.get(className);
-                String sourceStr = ClassUtils.generateEntityCode(
+                String sourceStr = CodeTemplateUtils.generateEntityCode(
                         className,
                         entityDetail.getPropertyMap(),
                         entityDetail.getDatabaseFieldMap(),
                         entityAttr.keySet());
                 entityCode.put(className, sourceStr);
-                String repositoryStr = ClassUtils.generateRepositoryCode(className);
+                String repositoryStr = CodeTemplateUtils.generateRepoCode(className);
                 repositoryCode.put(DatabaseUtils.generateRepositoryName(className), repositoryStr);
             }
 
             /** step 3. 生成初始化代码 */
-            String init = ClassUtils.generateInitCode(deviceName);
+            String init = CodeTemplateUtils.generateInitCode(entityAttr.keySet(), deviceName);
             initCode.put("ShadowInit", init);
 
             // 返回源码

@@ -9,8 +9,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.*;
 
@@ -24,8 +22,8 @@ import java.util.*;
 public class ClassUtils {
 
     // getter & setter 选项
-    private static final String METHOD_GETTER = "get";
-    private static final String METHOD_SETTER = "set";
+    static final String METHOD_GETTER = "get";
+    static final String METHOD_SETTER = "set";
 
     // 编译生成的class文件路径
     private static final String CLASS_FILE_PATH = "target/classes";
@@ -41,11 +39,11 @@ public class ClassUtils {
     public static final String INIT_FILE_PATH = DEVICE_JAVA_FILE_PATH + "init/";
 
     // 动态类的包名
-    private static final String ENTITY_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.entity";
+    static final String ENTITY_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.entity";
     // 数据库映射包名
-    private static final String REPOSITORY_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.repository";
+    static final String REPOSITORY_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.repository";
     // 初始化类包名
-    private static final String INIT_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.init";
+    static final String INIT_PACKAGE_NAME = MAIN_PACKAGE_NAME + "device.init";
 
     /**
      * 由属性及数据类型键值对生成java代码
@@ -309,11 +307,11 @@ public class ClassUtils {
      * @author szh
      * @Date 2019/6/18 15:17
      */
-    private static String generateFieldName(String typeName) {
-        if (Character.isUpperCase(typeName.charAt(0))) {
+    static String generateFieldName(String typeName) {
+        if (Character.isLowerCase(typeName.charAt(0))) {
             return typeName;
         } else {
-            return Character.toUpperCase(typeName.charAt(0)) + typeName.substring(1);
+            return Character.toLowerCase(typeName.charAt(0)) + typeName.substring(1);
         }
     }
 
