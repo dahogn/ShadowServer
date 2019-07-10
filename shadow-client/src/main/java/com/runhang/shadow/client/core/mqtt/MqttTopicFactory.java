@@ -130,15 +130,15 @@ public class MqttTopicFactory {
     private void connect() {
         mqttConnectOptions = new MqttConnectOptions();
         //是否清空客户端的连接记录。若为true，则断开后，broker将自动清除该客户端连接信息
-        mqttConnectOptions.setCleanSession(false);
+        mqttConnectOptions.setCleanSession(true);
         mqttConnectOptions.setUserName(mqttConfig.getUsername());
         mqttConnectOptions.setPassword(mqttConfig.getPassword().toCharArray());
         //设置超时时间，单位为秒
-        mqttConnectOptions.setConnectionTimeout(10);
+        mqttConnectOptions.setConnectionTimeout(mqttConfig.getTimeOut());
         //心跳时间，单位为秒。即多长时间确认一次Client端是否在线
-        mqttConnectOptions.setKeepAliveInterval(20);
+        mqttConnectOptions.setKeepAliveInterval(mqttConfig.getKeepAlive());
         //断开后，是否自动连接
-        mqttConnectOptions.setAutomaticReconnect(false);
+        mqttConnectOptions.setAutomaticReconnect(true);
         //允许同时发送几条消息（未收到broker确认信息）
         mqttConnectOptions.setMaxInflight(10);
         //设置版本号

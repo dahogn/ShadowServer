@@ -183,51 +183,11 @@ public class ClassUtils {
      */
     public static List<String> getAllEntityName() {
         List<String> fileNames = new ArrayList<>();
-//        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-//        String packagePath = ENTITY_PACKAGE_NAME.replace(".", "/");
-//        URL url = loader.getResource(packagePath);
-//        if (url != null) {
-//            String type = url.getProtocol();
-//            if ("file".endsWith(type)) {
-//                fileNames = getClassNameByFile(url.getPath(), null, true);
-//            }
-//        }
         Set<Class<?>> classList = ClassScaner.scanPackageBySuper(ENTITY_PACKAGE_NAME, ShadowEntity.class);
         for (Class clazz : classList) {
             fileNames.add(clazz.getSimpleName());
         }
         return fileNames;
-    }
-
-    /**
-     * @Description 获取路径下所有类名
-     * @param filePath 路径
-     * @param className 类名
-     * @param childPackage 是否获取子包下类名
-     * @return 类名
-     * @author szh
-     * @Date 2019/6/18 10:35
-     */
-    private static List<String> getClassNameByFile(String filePath, List<String> className, boolean childPackage) {
-        List<String> myClassName = new ArrayList<>();
-        File file = new File(filePath);
-        File[] childFiles = file.listFiles();
-        if (null != childFiles) {
-            for (File childFile : childFiles) {
-                if (childFile.isDirectory()) {
-                    if (childPackage) {
-                        myClassName.addAll(getClassNameByFile(childFile.getPath(), myClassName, childPackage));
-                    }
-                } else {
-                    String childFilePath = childFile.getPath();
-                    if (childFilePath.endsWith(".class")) {
-                        childFilePath = childFilePath.substring(childFilePath.indexOf("\\entity") + 8, childFilePath.lastIndexOf("."));
-                        myClassName.add(childFilePath);
-                    }
-                }
-            }
-        }
-        return myClassName;
     }
 
 }

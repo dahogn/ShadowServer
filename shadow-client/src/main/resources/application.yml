@@ -7,9 +7,9 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/test?characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://192.168.0.106:3306/test?characterEncoding=utf8&useSSL=false&serverTimezone=UTC
     username: root
-    password: root
+    password: rhwl6789,
 
   jpa:
     database: mysql
@@ -23,18 +23,18 @@ spring:
         dialect: org.hibernate.dialect.MySQL5Dialect
 # amqp
   rabbitmq:
-    host: 47.92.228.54
+    host: 192.168.0.106
     port: 5672
-    username: shengzeznkj
-    password: szznkj
+    username: guest
+    password: guest
 
 # mqtt
 com:
   mqtt:
-    host: 47.92.228.54
+    host: 192.168.0.106
     port: 1883
-    username: shengzeznkj
-    password: szznkj
+    username: guest
+    password: guest
     timeout: 60
     keepAlive: 180
     preFix: 'tcp://'

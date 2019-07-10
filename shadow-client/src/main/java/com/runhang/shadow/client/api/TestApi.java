@@ -1,5 +1,7 @@
 package com.runhang.shadow.client.api;
 
+import com.alibaba.fastjson.JSON;
+import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 import com.runhang.shadow.client.core.shadow.ShadowUtils;
@@ -10,6 +12,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 /**
  * @ClassName TestApi
@@ -48,6 +53,13 @@ public class TestApi {
             }
         }
         return "";
+    }
+
+    @RequestMapping("entityList")
+    @ResponseBody
+    public String entityList() {
+        List<String> names = ClassUtils.getAllEntityName();
+        return JSON.toJSONString(names);
     }
 
 }

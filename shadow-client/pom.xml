@@ -13,9 +13,11 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>shadow-client</name>
     <description>Client for shadow device</description>
+    <packaging>jar</packaging>
 
     <properties>
         <java.version>1.8</java.version>
+        <skipTests>true</skipTests>
     </properties>
 
     <dependencies>
@@ -106,6 +108,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <fork>true</fork>
+                </configuration>
             </plugin>
         </plugins>
     </build>
