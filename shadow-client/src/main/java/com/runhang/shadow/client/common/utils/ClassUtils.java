@@ -5,9 +5,7 @@ import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
 import java.lang.reflect.Field;
-import java.net.URL;
 import java.util.*;
 
 /**
@@ -54,6 +52,7 @@ public class ClassUtils {
             field.setAccessible(true);
             field.set(obj, value);
         } catch (NoSuchFieldException e) {
+            // getDeclaredField获取不到由父类继承的属性，子类中没有此属性，在父类属性中再查找
             try {
                 Field field = clazz.getSuperclass().getDeclaredField(fieldName);
                 field.setAccessible(true);

@@ -64,7 +64,7 @@ public class MqttTopicFactory {
             //断开后，是否自动连接
             mqttConnectOptions.setAutomaticReconnect(true);
             //允许同时发送几条消息（未收到broker确认信息）
-            mqttConnectOptions.setMaxInflight(10);
+            mqttConnectOptions.setMaxInflight(1000);
             client.connect(mqttConnectOptions);
             client.setCallback(new PushCallback());
             mqttClient = client;
@@ -140,7 +140,7 @@ public class MqttTopicFactory {
         //断开后，是否自动连接
         mqttConnectOptions.setAutomaticReconnect(true);
         //允许同时发送几条消息（未收到broker确认信息）
-        mqttConnectOptions.setMaxInflight(10);
+        mqttConnectOptions.setMaxInflight(1000);
         //设置版本号
         mqttConnectOptions.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1_1);
 
@@ -176,7 +176,7 @@ public class MqttTopicFactory {
      * @Description 发布主题数据。
      **/
     public void publishTypeZero(String topic, String pushMessage) {
-        publish(DATA_QOS_ZERO, true, topic, pushMessage);
+        publish(DATA_QOS_ZERO, false, topic, pushMessage);
     }
 
     /**
@@ -198,7 +198,7 @@ public class MqttTopicFactory {
      * @Description 发布主题数据。
      **/
     public void publishTypeOne(String topic, String pushMessage) {
-        publish(DATA_QOS_ZERO, true, topic, pushMessage);
+        publish(DATA_QOS_ZERO, false, topic, pushMessage);
     }
 
     /**
@@ -220,7 +220,7 @@ public class MqttTopicFactory {
      * @Description 发布主题数据。
      **/
     public synchronized void publishTypeTwo(String topic, String pushMessage) {
-        publish(DATA_QOS_TWO, true, topic, pushMessage);
+        publish(DATA_QOS_TWO, false, topic, pushMessage);
     }
 
     /**

@@ -56,7 +56,7 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
      */
     public ShadowEntity(String topic) throws Exception {
         super();
-        this.SRI = generateSRI();
+        generateSRI();
         boolean injectRe = EntityFactory.injectEntity(this);
         //log.info("inject " + SRI + ": " + injectRe);
         this.entityTopic =  topic;
@@ -92,8 +92,8 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
      * @author szh
      * @Date 2019/6/16 19:37
      */
-    private String generateSRI() {
-        return this.getClass().getSimpleName() + "_" +
+    public void generateSRI() {
+        this.SRI = this.getClass().getSimpleName() + "_" +
                 System.currentTimeMillis() + "_" +
                 (int) (Math.random() * 1000);
     }

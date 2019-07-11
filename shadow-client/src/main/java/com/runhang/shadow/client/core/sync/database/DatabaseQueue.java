@@ -12,6 +12,12 @@ import org.springframework.amqp.core.AmqpTemplate;
  **/
 public class DatabaseQueue {
 
+    /**
+     * @Description 异步数据库存储
+     * @param entity 操作实体
+     * @author szh
+     * @Date 2019/7/11 11:16
+     */
     public static void amqpSave(ShadowEntity entity) {
         AmqpTemplate rabbitTemplate = BeanUtils.getBean(AmqpTemplate.class);
         rabbitTemplate.convertAndSend(DatabaseQueueConfig.TOPIC, entity);

@@ -5,8 +5,6 @@ import com.runhang.shadow.client.core.model.EntityField;
 
 import javax.persistence.*;
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Entity
 public class Vending extends ShadowEntity {

@@ -69,6 +69,17 @@ public class CodeTemplateUtils {
                     .build();
             entityBuilder.addField(databaseMap);
 
+            // 构造方法
+            MethodSpec blankConstructor = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC).build();
+            entityBuilder.addMethod(blankConstructor);
+            MethodSpec topicConstructor = MethodSpec
+                    .constructorBuilder()
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(String.class, "topic")
+                    .addStatement("super(topic)")
+                    .build();
+            entityBuilder.addMethod(topicConstructor);
+
             // 属性 & getter & setter
             for (String fieldName : propertyMap.keySet()) {
                 // 1. 属性字段

@@ -173,7 +173,7 @@ public class ShadowBean {
                 }
             }
 
-            /** step2 更新文档属性 **/
+            /** step2 更新数据库 **/
             DatabaseQueue.amqpSave(data);
 
             /** step3 更新文档属性 **/

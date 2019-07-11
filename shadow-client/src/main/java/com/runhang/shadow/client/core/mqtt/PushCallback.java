@@ -41,6 +41,7 @@ public class PushCallback implements MqttCallbackExtended {
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) {
         String msgContent = new String(mqttMessage.getPayload());
+        log.info("接收时间：" + System.currentTimeMillis());
         log.info("接收消息主题 : " + s);
         log.info("接收消息Qos : " + mqttMessage.getQos());
         log.info("接收消息内容 : " + msgContent);
