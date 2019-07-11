@@ -23,8 +23,6 @@ import java.util.Map;
 @Service
 public class MqttTopicFactory {
 
-    private MqttConnectOptions mqttConnectOptions;
-
     private static final int DATA_QOS_ZERO = 0;
     private static final int DATA_QOS_ONE = 1;
     private static final int DATA_QOS_TWO = 2;
@@ -52,21 +50,7 @@ public class MqttTopicFactory {
             String createClientId = "shadow_server";
             MqttClient client = new MqttClient(serverUrl, createClientId, new MemoryPersistence());
             log.debug("---------------------create-mqtt:" + mqttConfig.getHost() + "---------------------------" + createClientId);
-            mqttConnectOptions = new MqttConnectOptions();
-            //是否清空客户端的连接记录。若为true，则断开后，broker将自动清除该客户端连接信息
-            mqttConnectOptions.setCleanSession(false);
-            mqttConnectOptions.setUserName(mqttConfig.getUsername());
-            mqttConnectOptions.setPassword(mqttConfig.getPassword().toCharArray());
-            //设置超时时间，单位为秒
-            mqttConnectOptions.setConnectionTimeout(mqttConfig.getTimeOut());
-            //心跳时间，单位为秒。即多长时间确认一次Client端是否在线
-            mqttConnectOptions.setKeepAliveInterval(mqttConfig.getKeepAlive());
-            //断开后，是否自动连接
-            mqttConnectOptions.setAutomaticReconnect(true);
-            //允许同时发送几条消息（未收到broker确认信息）
-            mqttConnectOptions.setMaxInflight(1000);
-            client.connect(mqttConnectOptions);
-            client.setCallback(new PushCallback());
+            connect();
             mqttClient = client;
         } catch (Exception e) {
             log.error("创建MqttClient失败:" + e.getMessage());
@@ -128,7 +112,7 @@ public class MqttTopicFactory {
      * @Description 连接MQTT。
      **/
     private void connect() {
-        mqttConnectOptions = new MqttConnectOptions();
+        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
         //是否清空客户端的连接记录。若为true，则断开后，broker将自动清除该客户端连接信息
         mqttConnectOptions.setCleanSession(true);
         mqttConnectOptions.setUserName(mqttConfig.getUsername());
