@@ -1,6 +1,5 @@
 package com.runhang.shadow.client.core.bean.comm;
 
-import com.runhang.shadow.client.core.bean.shadow.ShadowDesiredDoc;
 import com.runhang.shadow.client.core.bean.shadow.ShadowDocMetadata;
 import lombok.Data;
 
@@ -17,9 +16,9 @@ public class RePayload {
     private String status;
     /** 影子版本 **/
     private int version;
-    /** 回复内容 **/
+    /** 回复内容（更新失败时） **/
     private ReContent content;
-    /** 影子状态 **/
+    /** 影子状态（下发状态时） **/
     private ReState state;
     /** 影子元数据 **/
     private ShadowDocMetadata metadata;

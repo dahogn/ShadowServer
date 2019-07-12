@@ -8,7 +8,6 @@ import com.runhang.shadow.client.core.exception.NoSriException;
 import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.model.ShadowField;
 import com.runhang.shadow.client.core.shadow.EntityFactory;
-import com.runhang.shadow.client.core.shadow.ShadowFactory;
 import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.Data;
@@ -120,8 +119,8 @@ public class ShadowBean {
 
             // 增加
             for (ShadowField addField : updateValue.getAdd()) {
-                if (null != addField.getParent() && EntityFactory.isSriExist(addField.getParent())) {
-                    ShadowEntity parentEntity = EntityFactory.getEntity(addField.getParent());
+                if (null != addField.getParentSri() && EntityFactory.isSriExist(addField.getParentSri())) {
+                    ShadowEntity parentEntity = EntityFactory.getEntity(addField.getParentSri());
                     Map<String, Object> field = addField.getField();
                     field.put("SRI", addField.getSri());
                     field.put("entityTopic", topic);
@@ -134,22 +133,22 @@ public class ShadowBean {
                         // metadata
                         Map<String, Object> metadataTime = new HashMap<>();
                         metadataTime.put(ShadowConst.DOC_KEY_TIMESTAMP, current);
-                        metadata.getReported().put(addField.getParent(), metadataTime);
+                        metadata.getReported().put(addField.getParentSri(), metadataTime);
                     }
                 }
             }
             // 删除
             for (ShadowField delField : updateValue.getDelete()) {
                 if (null != delField.getSri() && EntityFactory.isSriExist(delField.getSri()) &&
-                        null != delField.getParent() && EntityFactory.isSriExist(delField.getParent())) {
+                        null != delField.getParentSri() && EntityFactory.isSriExist(delField.getParentSri())) {
                     // data
-                    ShadowEntity parentEntity = EntityFactory.getEntity(delField.getParent());
+                    ShadowEntity parentEntity = EntityFactory.getEntity(delField.getParentSri());
                     ShadowEntity delEntity = EntityFactory.getEntity(delField.getSri());
                     ClassUtils.listRemove(parentEntity, delField.getFieldName(), delEntity);
                     // metadata
                     Map<String, Object> metadataTime = new HashMap<>();
                     metadataTime.put(ShadowConst.DOC_KEY_TIMESTAMP, current);
-                    metadata.getReported().put(delField.getParent(), metadataTime);
+                    metadata.getReported().put(delField.getParentSri(), metadataTime);
                 }
             }
             // 更新

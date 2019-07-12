@@ -1,5 +1,6 @@
 # 影子数据流
 ### 一、影子结构
+shadow包中为内存影子类组成，comm包中为通信使用的bean
 ![类图](https://github.com/shengzh10/ShadowServer2/raw/master/shadow-client/doc/Class%20Diagram.jpg "影子类图")
 ### 二、应用程序更改设备状态
 开发者在修改完设备影子信息之后调用ShadowFactory的commitAntPush方法提交更改并推送期望状态到设备。
@@ -20,7 +21,7 @@
                 {
                     "className":"CargoRoad",
                     "sri":"CargoRoad_1560758107239_367",
-                    "parent":"Vending_1560758107221_553",
+                    "parentSri":"Vending_1560758107221_553",
                     "field":{
                         "serial":1,
                         "commodity":[
@@ -58,7 +59,7 @@
                     {
                         "className":"CargoRoad",
                         "sri":"CargoRoad_1560758107239_367",
-                        "parent":"Vending_1560758107221_553",
+                        "parentSri":"Vending_1560758107221_553",
                         "field":{
                             "serial":1,
                             "commodity":[
@@ -102,7 +103,7 @@
                 {
                     "className":"CargoRoad",
                     "sri":"CargoRoad_1560758107239_367",
-                    "parent":"Vending_1560758107221_553",
+                    "parentSri":"Vending_1560758107221_553",
                     "field":{
                         "serial":1,
                         "commodity":[
@@ -138,7 +139,7 @@ desired为null的时候表示设备端更新数据成功，清空服务器端的
                 {
                     "className":"Vending",
                     "sri":"Vending_1560758107221_553",
-                    "parent":"Vending_1560758107221_553",
+                    "parentSri":"Vending_1560758107221_553",
                     "field":{
                         "name":"vending4"
                     }
@@ -148,7 +149,7 @@ desired为null的时候表示设备端更新数据成功，清空服务器端的
                 {
                     "className":"Commodity",
                     "sri":"Commodity_1560758106907_511",
-                    "parent":"CargoRoad_1560758107239_367",
+                    "parentSri":"CargoRoad_1560758107239_367",
                     "fieldName":"commodity"
                 }
             ],
@@ -156,7 +157,7 @@ desired为null的时候表示设备端更新数据成功，清空服务器端的
                 {
                     "className":"Commodity",
                     "sri":"Commodity_1560758106907_222",
-                    "parent":"CargoRoad_1560758107239_367",
+                    "parentSri":"CargoRoad_1560758107239_367",
                     "fieldName":"commodity",
                     "field":{
                         "number":2,
@@ -278,6 +279,6 @@ desired为null的时候表示设备端更新数据成功，清空服务器端的
         "version":0
     },
     "timestamp":1561969659878,
-    "version":1
+    "version":4
 }
 ```

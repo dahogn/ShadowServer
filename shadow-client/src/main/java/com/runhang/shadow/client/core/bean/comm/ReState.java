@@ -13,9 +13,9 @@ import lombok.Data;
 @Data
 public class ReState {
 
-    /** 设备上报数据 **/
+    /** 设备上报的数据 **/
     private ShadowEntity reported;
-    /** 服务器期望数据 **/
+    /** 服务器期望的数据 **/
     private ShadowDesiredDoc desired;
 
     public ReState() {

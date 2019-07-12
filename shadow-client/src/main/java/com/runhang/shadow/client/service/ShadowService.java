@@ -104,7 +104,7 @@ public class ShadowService {
             String name = "new_" + vending.getName();
             String msg = String.format(
                     "{\"method\":\"update\",\"state\":{\"reported\":{\"update\":[{\"className\":\"Vending\"," +
-                            "\"sri\":\"%s\",\"parent\":\"%s\"," +
+                            "\"sri\":\"%s\",\"parentSri\":\"%s\"," +
                             "\"field\":{\"name\":\"%s\"}}],\"delete\":[],\"add\":[]},\"desired\":null},\"version\":2}",
                     vending.getSRI(), vending.getSRI(), name);
             msgMap.put("update/" + vending.getTopic(), msg);
@@ -128,6 +128,12 @@ public class ShadowService {
         new UpdatePublishThread(msg).start();
     }
 
+    /**
+     * @Description 查询设备并组织数据库方式更新信息
+     * @return url列表
+     * @author szh
+     * @Date 2019/7/12 9:19
+     */
     public List<List<String>> findDeviceViaDB() {
         List<Vending> vendingList = vendingRepository.findAll();
         log.warn("start time: " + System.currentTimeMillis());
@@ -150,10 +156,21 @@ public class ShadowService {
         return deviceList;
     }
 
+    /**
+     * @Description 多线程数据库方式更新
+     * @param urlList 访问的url
+     * @author szh
+     * @Date 2019/7/12 9:18
+     */
     public void updateViaDB(List<String> urlList) {
         new UpdateViaDBThread(urlList).start();
     }
 
+    /**
+     * @Description 访问接口线程
+     * @author szh
+     * @Date 2019/7/12 9:19
+     */
     private class UpdateViaDBThread extends Thread {
 
         List<String> urlList;

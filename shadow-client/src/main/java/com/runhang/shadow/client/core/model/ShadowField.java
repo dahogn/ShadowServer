@@ -19,11 +19,11 @@ public class ShadowField {
     private String className;
     /** 实体标识 **/
     private String sri;
-    /** 改变的属性名 **/
-    private String fieldName;
     /** 父级sri **/
-    private String parent;
-    /** 变化属性 **/
+    private String parentSri;
+    /** 改变的属性名（适用于增删list属性） **/
+    private String fieldName;
+    /** 变化属性（适用于修改属性） **/
     private Map<String, Object> field;
     /** 变化操作（不序列化） **/
     @JSONField(serialize = false)
@@ -32,11 +32,11 @@ public class ShadowField {
     public ShadowField() {
     }
 
-    public ShadowField(String className, String sri, String fieldName, String parent, EntityOperation operation) {
+    public ShadowField(String className, String sri, String fieldName, String parentSri, EntityOperation operation) {
         this.className = className;
         this.sri = sri;
         this.fieldName = fieldName;
-        this.parent = parent;
+        this.parentSri = parentSri;
         this.operation = operation;
     }
 
@@ -47,11 +47,11 @@ public class ShadowField {
         this.operation = operation;
     }
 
-    public ShadowField(String className, String sri, String fieldName, String parent, Map<String, Object> field, EntityOperation operation) {
+    public ShadowField(String className, String sri, String fieldName, String parentSri, Map<String, Object> field, EntityOperation operation) {
         this.className = className;
         this.sri = sri;
         this.fieldName = fieldName;
-        this.parent = parent;
+        this.parentSri = parentSri;
         this.field = field;
         this.operation = operation;
     }
