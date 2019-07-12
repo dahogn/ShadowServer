@@ -17,7 +17,9 @@ import java.util.Map;
  **/
 public class EntityDataObserver implements ShadowObserver {
 
+    /** 观察对象所属设备的topic **/
     private String shadowTopic;
+    /** 观察对象的sri **/
     private String sri;
 
     EntityDataObserver() {

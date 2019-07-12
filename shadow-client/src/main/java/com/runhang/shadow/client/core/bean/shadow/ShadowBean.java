@@ -13,6 +13,7 @@ import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -230,7 +231,7 @@ public class ShadowBean {
      * @author szh
      * @Date 2019/5/2 17:28
      */
-    public ReErrorCode updateShadowByServer(long timestamp) {
+    public ReErrorCode updateShadowByServer(long timestamp) throws NoSriException {
         // 判断是否加了写锁
         if (rwLock.isWriteLocked()) {
             return ReErrorCode.SHADOW_IS_WRITING;
@@ -326,17 +327,25 @@ public class ShadowBean {
      * @author szh
      * @Date 2019/6/26 19:01
      */
-    private void compareAttr(ShadowEntity entity, ShadowEntity doc, List<String> entityNames) {
+    private void compareAttr(ShadowEntity entity, ShadowEntity doc, List<String> entityNames) throws NoSriException {
+        // 检查实体sri
+        if (StringUtils.isEmpty(entity.getSRI())) {
+            throw new NoSriException();
+        }
+
+        // 遍历对比
         Field[] fields = entity.getClass().getDeclaredFields();
         for (Field f : fields) {
             f.setAccessible(true);
             String fieldType = f.getType().getSimpleName();
             String fieldName = f.getName();
             if ("List".equals(fieldType)) {
+                // 是list属性则比照内存中的对象与影子文档中的不同
                 List<ShadowEntity> newList = (List<ShadowEntity>) ClassUtils.getValue(entity, fieldName);
                 List<ShadowEntity> oldList = (List<ShadowEntity>) ClassUtils.getValue(doc, fieldName);
                 compareList(newList, oldList, entity.getSRI(), fieldName, entityNames);
             } else if (entityNames.contains(fieldType)) {
+                // 是受管理的实体则递归遍历继续比照内部的list
                 ShadowEntity childEntity = (ShadowEntity) ClassUtils.getValue(entity, fieldName);
                 ShadowEntity childDoc = (ShadowEntity) ClassUtils.getValue(doc, fieldName);
                 compareAttr(childEntity, childDoc, entityNames);
@@ -352,7 +361,8 @@ public class ShadowBean {
      * @author szh
      * @Date 2019/6/26 17:07
      */
-    private void compareList(List<ShadowEntity> newList, List<ShadowEntity> oldList, String parentSri, String listName, List<String> entityNames) {
+    private void compareList(List<ShadowEntity> newList, List<ShadowEntity> oldList, String parentSri,
+                             String listName, List<String> entityNames) throws NoSriException {
         if ((null == oldList || oldList.isEmpty()) && (null == newList || newList.isEmpty())) {
             return;
         }
@@ -396,11 +406,12 @@ public class ShadowBean {
             List<ShadowEntity> newListSame = newList.stream().filter(oldList::contains).collect(Collectors.toList());
             List<ShadowEntity> oldListSame = oldList.stream().filter(newList::contains).collect(Collectors.toList());
 
-            for (ShadowEntity entity : newListSame) {
-                Optional<ShadowEntity> sameEntityOp = oldListSame.stream().filter(item -> item.equals(entity)).findFirst();
-                if (sameEntityOp.isPresent()) {
-                    ShadowEntity sameEntity = sameEntityOp.get();
-                    compareAttr(entity, sameEntity, entityNames);
+            for (ShadowEntity memEntity : newListSame) {
+                // 获取相同的实体
+                Optional<ShadowEntity> docEntityOp = oldListSame.stream().filter(item -> item.equals(memEntity)).findFirst();
+                if (docEntityOp.isPresent()) {
+                    ShadowEntity docEntity = docEntityOp.get();
+                    compareAttr(memEntity, docEntity, entityNames);
                 }
             }
         }

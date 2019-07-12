@@ -77,7 +77,7 @@ public class ShadowUtils {
      * @author szh
      * @Date 2019/5/9 10:46
      */
-    public static synchronized ReErrorCode commit(String topic) {
+    public static synchronized ReErrorCode commit(String topic) throws NoSriException {
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
         long current = System.currentTimeMillis();
         ReErrorCode errorCode = shadowBean.updateShadowByServer(current);
@@ -98,7 +98,7 @@ public class ShadowUtils {
      * @author szh
      * @Date 2019/5/2 16:17
      */
-    public static synchronized ReErrorCode commitAndPush(String topic) {
+    public static synchronized ReErrorCode commitAndPush(String topic) throws NoSriException {
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
         long current = System.currentTimeMillis();
         ReErrorCode error = shadowBean.updateShadowByServer(current);
