@@ -31,7 +31,7 @@ shadow包中为内存影子类组成，comm包中为通信使用的bean
                                 "name":"可乐",
                                 "number":1,
                                 "price":1.1,
-                                "sRI":"Commodity_1560758106907_511"
+                                "sri":"Commodity_1560758106907_511"
                             }
                         ]
                     }
@@ -69,7 +69,7 @@ shadow包中为内存影子类组成，comm包中为通信使用的bean
                                     "name":"可乐",
                                     "number":1,
                                     "price":1.1,
-                                    "sRI":"Commodity_1560758106907_511"
+                                    "sri":"Commodity_1560758106907_511"
                                 }
                             ]
                         }
@@ -113,7 +113,7 @@ shadow包中为内存影子类组成，comm包中为通信使用的bean
                                 "name":"可乐",
                                 "number":1,
                                 "price":1.1,
-                                "sRI":"Commodity_1560758106907_511"
+                                "sri":"Commodity_1560758106907_511"
                             }
                         ]
                     }
