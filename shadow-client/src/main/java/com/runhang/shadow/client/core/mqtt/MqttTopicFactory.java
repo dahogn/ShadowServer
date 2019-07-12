@@ -50,8 +50,8 @@ public class MqttTopicFactory {
             String createClientId = "shadow_server";
             MqttClient client = new MqttClient(serverUrl, createClientId, new MemoryPersistence());
             log.debug("---------------------create-mqtt:" + mqttConfig.getHost() + "---------------------------" + createClientId);
-            connect();
             mqttClient = client;
+            connect();
         } catch (Exception e) {
             log.error("创建MqttClient失败:" + e.getMessage());
         }

@@ -22,6 +22,14 @@ public class Commodity extends ShadowEntity {
         databaseFieldMap.put("id", new DatabaseField("commodity", "id"));
     }
 
+    public Commodity() {
+
+    }
+
+    public Commodity(String topic) throws Exception {
+        super(topic);
+    }
+
     private Integer number;
 
     public void setNumber(Integer number) {

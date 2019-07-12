@@ -25,6 +25,9 @@ public class ShadowField {
     private String fieldName;
     /** 变化属性（适用于修改属性） **/
     private Map<String, Object> field;
+    /** 变化属性的原值（适用于修改属性） **/
+    @JSONField(serialize = false)
+    private Map<String, Object> originalField;
     /** 变化操作（不序列化） **/
     @JSONField(serialize = false)
     private EntityOperation operation;
@@ -40,10 +43,11 @@ public class ShadowField {
         this.operation = operation;
     }
 
-    public ShadowField(String className, String sri, Map<String, Object> field, EntityOperation operation) {
+    public ShadowField(String className, String sri, Map<String, Object> field, Map<String, Object> originalField, EntityOperation operation) {
         this.className = className;
         this.sri = sri;
         this.field = field;
+        this.originalField = originalField;
         this.operation = operation;
     }
 

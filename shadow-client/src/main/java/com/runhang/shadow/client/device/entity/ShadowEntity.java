@@ -57,9 +57,9 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
     public ShadowEntity(String topic) throws Exception {
         super();
         generateSRI();
+        this.entityTopic =  topic;
         boolean injectRe = EntityFactory.injectEntity(this);
         //log.info("inject " + SRI + ": " + injectRe);
-        this.entityTopic =  topic;
     }
 
     public void setId(int id) {

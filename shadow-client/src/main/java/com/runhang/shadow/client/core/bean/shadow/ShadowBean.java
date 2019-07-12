@@ -1,5 +1,6 @@
 package com.runhang.shadow.client.core.bean.shadow;
 
+import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.bean.comm.ShadowConst;
 import com.runhang.shadow.client.core.enums.EntityOperation;
@@ -14,9 +15,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -78,8 +77,12 @@ public class ShadowBean {
      */
     public void addModifiedField(ShadowField field) {
         if (shadowField.keySet().contains(field.getSri())) {
+            // 更新值
             Map<String, Object> f = shadowField.get(field.getSri()).getField();
             f.putAll(field.getField());
+            // 原有值
+            Map<String, Object> o = shadowField.get(field.getSri()).getOriginalField();
+            o.putAll(field.getOriginalField());
         } else {
             shadowField.put(field.getSri(), field);
         }
@@ -159,7 +162,8 @@ public class ShadowBean {
                         for (String fieldName : updateField.getField().keySet()) {
                             boolean updateSuccess = ClassUtils.setValue(entity, fieldName, updateField.getField().get(fieldName));
                             if (!updateSuccess) {
-                                // TODO 影子属性回退
+                                // 影子属性回退
+                                shadowRevert();
                                 return ReErrorCode.SHADOW_ATTR_WRONG;
                             } else {
                                 // metadata
@@ -236,8 +240,10 @@ public class ShadowBean {
             // 对照list的变更
             List<String> entityNames = ClassUtils.getAllEntityName();
             compareAttr(data, (ShadowEntity) doc.getState().getReported(data.getClass()), entityNames);
+
             // 回退影子对象，当设备端修改成功之后才更改影子对象
             shadowRevert();
+
             // 更新文档
             // desired
             for (ShadowField sf : shadowField.values()) {
@@ -279,13 +285,37 @@ public class ShadowBean {
      * @Date 2019/4/30 17:15
      */
     private void shadowRevert() {
-        // TODO 影子版本回退 我不会写了 基本类型可以覆盖，对象不能
-        // 需要针对增、删、改进行不同的回退，对象还要考虑容器注入问题
-        ShadowEntity shadowAttr = (ShadowEntity) doc.getState().getReported(data.getClass());
-//        // 使用影子文档部分的数据覆盖影子对象
-//        for (String key : shadowAttr.keySet()) {
-//            ClassUtils.setValue(data, key, shadowAttr.get(key));
-//        }
+        for (ShadowField sf : shadowField.values()) {
+            switch (sf.getOperation()) {
+                case ADD:
+                    // 新增的删掉
+                    Object addParentObj = BeanUtils.getBean(sf.getParentSri());
+                    Object addObj = BeanUtils.getBean(sf.getSri());
+                    if (null != addParentObj && null != addObj) {
+                        ClassUtils.listRemove(addParentObj, sf.getFieldName(), addObj);
+                    }
+                    break;
+
+                case DELETE:
+                    // 删除的加回来
+                    Object delParentObj = BeanUtils.getBean(sf.getParentSri());
+                    Object delObj = BeanUtils.getBean(sf.getSri());
+                    if (null != delParentObj && null != delObj) {
+                        ClassUtils.listRemove(delParentObj, sf.getFieldName(), delObj);
+                    }
+                    break;
+
+                case UPDATE:
+                    // 更新的恢复
+                    Object updateObj = BeanUtils.getBean(sf.getSri());
+                    if (null != updateObj) {
+                        for (String updateField : sf.getOriginalField().keySet()) {
+                            ClassUtils.setValue(updateObj, updateField, sf.getOriginalField().get(updateField));
+                        }
+                    }
+                    break;
+            }
+        }
     }
 
     /**
@@ -305,7 +335,7 @@ public class ShadowBean {
             if ("List".equals(fieldType)) {
                 List<ShadowEntity> newList = (List<ShadowEntity>) ClassUtils.getValue(entity, fieldName);
                 List<ShadowEntity> oldList = (List<ShadowEntity>) ClassUtils.getValue(doc, fieldName);
-                compareList(newList, oldList, entity.getSRI(), fieldName);
+                compareList(newList, oldList, entity.getSRI(), fieldName, entityNames);
             } else if (entityNames.contains(fieldType)) {
                 ShadowEntity childEntity = (ShadowEntity) ClassUtils.getValue(entity, fieldName);
                 ShadowEntity childDoc = (ShadowEntity) ClassUtils.getValue(doc, fieldName);
@@ -322,7 +352,7 @@ public class ShadowBean {
      * @author szh
      * @Date 2019/6/26 17:07
      */
-    private void compareList(List<ShadowEntity> newList, List<ShadowEntity> oldList, String parentSri, String listName) {
+    private void compareList(List<ShadowEntity> newList, List<ShadowEntity> oldList, String parentSri, String listName, List<String> entityNames) {
         if ((null == oldList || oldList.isEmpty()) && (null == newList || newList.isEmpty())) {
             return;
         }
@@ -355,8 +385,23 @@ public class ShadowBean {
         if (null != toAdd) {
             for (ShadowEntity entity : toAdd) {
                 ShadowField addField = new ShadowField(entity.getClass().getSimpleName(), entity.getSRI(), listName,
-                        parentSri, ClassUtils.getValueMap(entity), EntityOperation.ADD);
+                        parentSri, ClassUtils.getValueMap(entity, Collections.singletonList("databaseFieldMap")), EntityOperation.ADD);
                 shadowField.put(entity.getSRI(), addField);
+            }
+        }
+
+        // 继续比较list中没有删除和修改的部分的实体变化
+        if (null != newList && null != oldList) {
+            // 获得相同部分
+            List<ShadowEntity> newListSame = newList.stream().filter(oldList::contains).collect(Collectors.toList());
+            List<ShadowEntity> oldListSame = oldList.stream().filter(newList::contains).collect(Collectors.toList());
+
+            for (ShadowEntity entity : newListSame) {
+                Optional<ShadowEntity> sameEntityOp = oldListSame.stream().filter(item -> item.equals(entity)).findFirst();
+                if (sameEntityOp.isPresent()) {
+                    ShadowEntity sameEntity = sameEntityOp.get();
+                    compareAttr(entity, sameEntity, entityNames);
+                }
             }
         }
     }

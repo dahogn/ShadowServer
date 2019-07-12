@@ -17,14 +17,23 @@ public class Vending extends ShadowEntity {
         databaseFieldMap.put("id", new DatabaseField("vending", "id"));
     }
 
+    public Vending() {
+
+    }
+
+    public Vending(String topic) throws Exception {
+        super(topic);
+    }
+
     private String name;
 
     public void setName(String name) {
         /* 上写锁 */
         lock.writeLock().lock();
         try{
+            EntityField field = new EntityField("Vending", "name", this.name);
             this.name = name;
-            EntityField field = new EntityField("Vending", "name", name);
+            field.setFieldValue(name);
             notifyObservers(databaseFieldMap.get("name"), field);
         }catch (Exception e){
             e.printStackTrace();
@@ -49,8 +58,9 @@ public class Vending extends ShadowEntity {
     private String topic;
 
     public void setTopic(String topic) {
+        EntityField field = new EntityField("Vending", "topic", this.topic);
         this.topic = topic;
-        EntityField field = new EntityField("Vending", "topic", topic);
+        field.setFieldValue(topic);
         notifyObservers(databaseFieldMap.get("topic"), field);
     }
 
@@ -63,8 +73,9 @@ public class Vending extends ShadowEntity {
     private List<CargoRoad> cargoRoad;
 
     public void setCargoRoad(List<CargoRoad> cargoRoad) {
+        EntityField field = new EntityField("Vending", "cargoRoad", this.cargoRoad);
         this.cargoRoad = cargoRoad;
-        EntityField field = new EntityField("Vending", "cargoRoad", cargoRoad);
+        field.setFieldValue(field);
         notifyObservers(databaseFieldMap.get("cargoRoad"), field);
     }
 

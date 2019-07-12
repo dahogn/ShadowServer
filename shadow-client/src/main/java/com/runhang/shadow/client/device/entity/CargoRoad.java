@@ -18,6 +18,14 @@ public class CargoRoad extends ShadowEntity {
         databaseFieldMap.put("id", new DatabaseField("cargo_road", "id"));
     }
 
+    public CargoRoad() {
+
+    }
+
+    public CargoRoad(String topic) throws Exception {
+        super(topic);
+    }
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "cargo_road_id")
     private List<Commodity> commodity;

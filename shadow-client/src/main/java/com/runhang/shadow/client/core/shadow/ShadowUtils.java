@@ -81,10 +81,10 @@ public class ShadowUtils {
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
         long current = System.currentTimeMillis();
         ReErrorCode errorCode = shadowBean.updateShadowByServer(current);
-        if (null == errorCode) {
-            // 保存到数据库
-            DatabaseQueue.amqpSave(shadowBean.getData());
-        }
+//        if (null == errorCode) {
+//            // 保存到数据库
+//            DatabaseQueue.amqpSave(shadowBean.getData());
+//        }
         Semaphore semaphore = ShadowFactory.getSemaphore(topic);
         semaphore.release();
         ShadowUtils.class.notifyAll();
@@ -104,7 +104,7 @@ public class ShadowUtils {
         ReErrorCode error = shadowBean.updateShadowByServer(current);
         if (null == error) {
             // 保存到数据库
-            DatabaseQueue.amqpSave(shadowBean.getData());
+//            DatabaseQueue.amqpSave(shadowBean.getData());
             // 更新版本
             shadowBean.getDoc().addUpVersion();
             // 下发状态

@@ -33,9 +33,14 @@ public class EntityDataObserver implements ShadowObserver {
     public void onFieldUpdate(DatabaseField data, EntityField field) {
         // 影子中记录变更
         ShadowBean bean = ShadowFactory.getShadowBean(shadowTopic);
+        // 变化属性
         Map<String, Object> fieldMap = new HashMap<>();
         fieldMap.put(field.getFieldName(), field.getFieldValue());
-        ShadowField shadowField = new ShadowField(field.getClassName(), sri, fieldMap, EntityOperation.UPDATE);
+        // 属性原值
+        Map<String, Object> originalFieldMap = new HashMap<>();
+        originalFieldMap.put(field.getFieldName(), field.getOriginalValue());
+
+        ShadowField shadowField = new ShadowField(field.getClassName(), sri, fieldMap, originalFieldMap, EntityOperation.UPDATE);
         bean.addModifiedField(shadowField);
     }
 

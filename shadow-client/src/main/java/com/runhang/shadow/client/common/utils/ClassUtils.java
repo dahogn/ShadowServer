@@ -92,11 +92,12 @@ public class ClassUtils {
     /**
      * @Description 获取bean的所有属性名及值
      * @param obj bean
+     * @param excludeFields 排除的属性名
      * @return 属性名及对应值
      * @author szh
      * @Date 2019/6/26 16:58
      */
-    public static Map<String, Object> getValueMap(Object obj) {
+    public static Map<String, Object> getValueMap(Object obj, List<String> excludeFields) {
         Map<String, Object> map = new HashMap<>();
         if (null == obj) {
             return map;
@@ -106,7 +107,9 @@ public class ClassUtils {
             Field[] fields = obj.getClass().getDeclaredFields();
             for (Field f : fields) {
                 f.setAccessible(true);
-                map.put(f.getName(), f.get(obj));
+                if (!excludeFields.contains(f.getName())) {
+                    map.put(f.getName(), f.get(obj));
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage());
