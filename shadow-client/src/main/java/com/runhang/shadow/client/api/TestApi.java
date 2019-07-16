@@ -5,6 +5,7 @@ import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.enums.ReErrorCode;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 import com.runhang.shadow.client.core.shadow.ShadowUtils;
+import com.runhang.shadow.client.device.entity.CargoRoad;
 import com.runhang.shadow.client.device.entity.Commodity;
 import com.runhang.shadow.client.device.entity.Vending;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,7 +35,7 @@ public class TestApi {
     @RequestMapping("publish")
     public String publish(@RequestParam("topic") String topic,
                           @RequestBody String msg) {
-        mqttTopicFactory.publishTypeOne(topic, msg);
+        mqttTopicFactory.publishTypeZero(topic, msg);
         return "";
     }
 
@@ -47,12 +49,17 @@ public class TestApi {
     public String modify() throws Exception {
         Vending vending = (Vending) ShadowUtils.getShadow("vending");
         if (null != vending) {
-            vending.setName("vending3");
+            //vending.setName("vending3");
+            CargoRoad cargoRoad = new CargoRoad("vending");
+            cargoRoad.setSerial(1);
             Commodity commodity = new Commodity("vending");
             commodity.setPrice(1.0);
             commodity.setNumber(10);
             commodity.setName("cake");
-            vending.getCargoRoad().get(0).getCommodity().add(commodity);
+            List<Commodity> commodityList = new ArrayList<>();
+            commodityList.add(commodity);
+            cargoRoad.setCommodity(commodityList);
+            vending.getCargoRoad().add(cargoRoad);
             ReErrorCode error = ShadowUtils.commitAndPush("vending");
             if (null != error) {
                 log.error(error.getErrorMsg());

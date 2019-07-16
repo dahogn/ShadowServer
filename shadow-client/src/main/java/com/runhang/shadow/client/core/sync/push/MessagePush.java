@@ -36,7 +36,7 @@ class MessagePush {
         if (null != version) {
             replyBean.setVersion(version);
         }
-        mqttTopicFactory.publishTypeOne(topic, replyBean.toString());
+        mqttTopicFactory.publishTypeZero(topic, replyBean.toString());
     }
 
 }

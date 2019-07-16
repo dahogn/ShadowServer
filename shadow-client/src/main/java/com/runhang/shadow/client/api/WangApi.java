@@ -88,13 +88,22 @@ public class WangApi {
                 list.remove(0);
             }
             System.out.println(Thread.currentThread().getName()+" 子类的长度 "+ list.size());
-            ReErrorCode error = ShadowUtils.commitAndPush("test");
+            try {
+                ReErrorCode error = ShadowUtils.commitAndPush("test");
+
             if (null != error) {
                 System.out.println(error.getErrorMsg());
             }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             Vending vending1 = (Vending) ShadowUtils.getShadow("test");
             System.out.println(Thread.currentThread().getName()+" 子类的长度 "+ vending1.getCargoRoad().size());
-            ShadowUtils.commit("test");
+            try {
+                ShadowUtils.commit("test");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             System.out.println(Thread.currentThread().getName() + "end");
         }, "修改线程" + 1).start();
 
@@ -107,9 +116,13 @@ public class WangApi {
                     list.remove(0);
                 }
                 System.out.println(Thread.currentThread().getName()+" 子类的长度 "+ list.size());
-                ReErrorCode error = ShadowUtils.commitAndPush("test");
-                if (null != error) {
-                    System.out.println(error.getErrorMsg());
+                try {
+                    ReErrorCode error = ShadowUtils.commitAndPush("test");
+                    if (null != error) {
+                        System.out.println(error.getErrorMsg());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
             System.out.println(Thread.currentThread().getName() + "end");

@@ -25,7 +25,7 @@ public class UpdateReplyPush extends MessagePush {
         RePayload rePayload = new RePayload(ShadowConst.PAYLOAD_STATUS_SUCCESS, version);
         String publishTopic = TopicUtils.getGetTopic(topic);
         assembleAndPublish(ShadowConst.REPLY_METHOD_REPLY, rePayload,
-                publishTopic, System.currentTimeMillis(), null);
+                publishTopic, System.currentTimeMillis(), version);
     }
 
     /**

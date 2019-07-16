@@ -192,4 +192,15 @@ public class ClassUtils {
         return fileNames;
     }
 
+    /**
+     * @Description 获取实体包名
+     * @param className 实体类名
+     * @return 包名
+     * @author szh
+     * @Date 2019/7/16 13:00
+     */
+    public static String getEntityPackageName(String className) {
+        return ENTITY_PACKAGE_NAME + "." + className;
+    }
+
 }

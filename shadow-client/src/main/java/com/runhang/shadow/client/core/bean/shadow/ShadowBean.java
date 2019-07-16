@@ -1,5 +1,8 @@
 package com.runhang.shadow.client.core.bean.shadow;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.bean.comm.ShadowConst;
@@ -42,7 +45,7 @@ public class ShadowBean {
     private ShadowDoc doc;
     /**
      * 影子变更属性
-     * key sri
+     * key: sri
      * value：变更属性
      */
     private Map<String, ShadowField> shadowField = new HashMap<>();
@@ -124,11 +127,18 @@ public class ShadowBean {
             // 增加
             for (ShadowField addField : updateValue.getAdd()) {
                 if (null != addField.getParentSri() && EntityFactory.isSriExist(addField.getParentSri())) {
+                    // 获取父类实体
                     ShadowEntity parentEntity = EntityFactory.getEntity(addField.getParentSri());
+                    // 实体补充sri和topic
                     Map<String, Object> field = addField.getField();
                     field.put("SRI", addField.getSri());
                     field.put("entityTopic", topic);
-                    ShadowEntity entity = (ShadowEntity) ClassUtils.newEntity(addField.getClassName(), addField.getField());
+                    // 实体属性反序列化，强转成为用户定义实体
+                    int disableDecimalFeature = JSON.DEFAULT_PARSER_FEATURE & ~Feature.UseBigDecimal.getMask();
+                    String json = JSONObject.toJSONString(addField.getField());
+                    Class<?> entityClass = Class.forName(ClassUtils.getEntityPackageName(addField.getClassName()));
+                    ShadowEntity entity = JSONObject.parseObject(json, entityClass, disableDecimalFeature);
+                    // 影子更新
                     if (null != entity) {
                         // data
                         List<String> entityNames = ClassUtils.getAllEntityName();
