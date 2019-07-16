@@ -3,6 +3,7 @@ package com.runhang.shadow.client.core.aspect;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +18,28 @@ import org.springframework.stereotype.Component;
 @Aspect
 public class ShadowServiceAspect {
 
+    /**
+     * @Description 影子服务完成后释放信号量
+     * @param point 连接点
+     * @author szh
+     * @Date 2019/7/16 18:05
+     */
     @After("@annotation(com.runhang.shadow.client.core.aspect.ShadowService)")
     public void dealShadowService(JoinPoint point) {
         log.warn("deal shadow service");
         log.info("aspect thread: " + Thread.currentThread().getName());
+    }
+
+    /**
+     * @Description 影子服务抛出异常进行回滚
+     * @param point 连接点
+     * @param e 异常
+     * @author szh
+     * @Date 2019/7/16 18:06
+     */
+    @AfterThrowing(value = "@annotation(com.runhang.shadow.client.core.aspect.ShadowService)", throwing = "e")
+    public void dealServiceException(JoinPoint point, Exception e) throws Throwable {
+        throw e;
     }
 
 }
