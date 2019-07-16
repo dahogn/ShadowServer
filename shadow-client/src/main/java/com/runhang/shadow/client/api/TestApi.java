@@ -8,6 +8,7 @@ import com.runhang.shadow.client.core.shadow.ShadowUtils;
 import com.runhang.shadow.client.device.entity.CargoRoad;
 import com.runhang.shadow.client.device.entity.Commodity;
 import com.runhang.shadow.client.device.entity.Vending;
+import com.runhang.shadow.client.service.ShadowService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,6 +32,8 @@ public class TestApi {
 
     @Autowired
     private MqttTopicFactory mqttTopicFactory;
+    @Autowired
+    private ShadowService shadowService;
 
     @RequestMapping("publish")
     public String publish(@RequestParam("topic") String topic,
@@ -73,6 +76,12 @@ public class TestApi {
     public String entityList() {
         List<String> names = ClassUtils.getAllEntityName();
         return JSON.toJSONString(names);
+    }
+
+    @RequestMapping("vending")
+    public String getVending() {
+        shadowService.getVending();
+        return "";
     }
 
 }

@@ -2,6 +2,7 @@ package com.runhang.shadow.client.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
+import com.runhang.shadow.client.core.shadow.ShadowUtils;
 import com.runhang.shadow.client.device.entity.CargoRoad;
 import com.runhang.shadow.client.device.entity.Commodity;
 import com.runhang.shadow.client.device.entity.Vending;
@@ -227,6 +228,12 @@ public class ShadowService {
                 }
             }
         }
+    }
+
+    @com.runhang.shadow.client.core.aspect.ShadowService
+    public void getVending() {
+        Vending vending = (Vending) ShadowUtils.getShadow("vending");
+        log.info("service thread: " + Thread.currentThread().getName());
     }
 
 }
