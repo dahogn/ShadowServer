@@ -22,6 +22,8 @@ public class ShadowFactory {
     private static Map<String, String> beanMap = new HashMap<>();
     /** 保存影子的信号量*/
     private static Map<String, Semaphore> semaphoreMap = new HashMap<>();
+    /** 保存线程名称与对应的topics*/
+    private static Map<String,List<String>> threadMap = new HashMap<>();
 
     /**
      * 注入影子到容器
@@ -135,6 +137,14 @@ public class ShadowFactory {
      */
     public static Semaphore getSemaphore(String topic){
         return semaphoreMap.get(topic);
+    }
+
+    public static List<String> getThreadTopic(String threadName){
+        return threadMap.get(threadName);
+    }
+
+    public static Map<String,List<String>> getThreadMap(){
+        return threadMap;
     }
 
 }

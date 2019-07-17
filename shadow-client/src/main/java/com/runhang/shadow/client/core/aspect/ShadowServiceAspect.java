@@ -1,11 +1,15 @@
 package com.runhang.shadow.client.core.aspect;
 
+import com.runhang.shadow.client.core.shadow.ShadowFactory;
+import com.runhang.shadow.client.core.shadow.ShadowUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @ClassName ShadowServiceAspect
@@ -28,6 +32,13 @@ public class ShadowServiceAspect {
     public void dealShadowService(JoinPoint point) {
         log.warn("deal shadow service");
         log.info("aspect thread: " + Thread.currentThread().getName());
+        String threadName = Thread.currentThread().getName();
+        List<String> topics = ShadowFactory.getThreadTopic(threadName);
+        if (topics != null){
+            for (String topic: topics){
+                ShadowUtils.releaseSemaphore(topic);
+            }
+        }
     }
 
     /**
