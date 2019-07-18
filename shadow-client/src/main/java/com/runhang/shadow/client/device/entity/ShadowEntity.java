@@ -1,15 +1,12 @@
 package com.runhang.shadow.client.device.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.runhang.shadow.client.core.model.DatabaseField;
 import com.runhang.shadow.client.core.shadow.EntityFactory;
 import com.runhang.shadow.client.core.shadow.ShadowSubject;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -22,17 +19,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @Slf4j
 @MappedSuperclass
 public class ShadowEntity extends ShadowSubject implements Serializable {
+
     @Transient
     ReadWriteLock lock = new ReentrantReadWriteLock();
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
 
     /**
      * Shadow Resource Identifier
      * 影子资源标识符
      */
+    @Id
     @JSONField(name = "sri")
     @Column(name = "sri")
     private String SRI;
@@ -46,7 +41,7 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
 
 
     ShadowEntity() {
-
+        generateSRI();
     }
 
     /**
@@ -58,16 +53,35 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
         super();
         generateSRI();
         this.entityTopic =  topic;
-        boolean injectRe = EntityFactory.injectEntity(this);
+        EntityFactory.injectEntity(this);
         //log.info("inject " + SRI + ": " + injectRe);
     }
 
-    public void setId(int id) {
-        this.id = id;
+    /**
+     * @Description 生成影子SRI
+     * @author szh
+     * @Date 2019/6/16 19:37
+     */
+    public void generateSRI() {
+        int random = (int) (Math.random() * 1000);
+        this.SRI = this.getClass().getSimpleName() + "_" +
+                System.currentTimeMillis() + "_" +
+                String.format("%03d", random);
     }
 
-    public int getId() {
-        return id;
+    /**
+     * @Description 通过sri判断是否是同一个实体
+     * @param o 另一个实体
+     * @return 是否是同一个
+     * @author szh
+     * @Date 2019/7/18 9:44
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ShadowEntity)) {
+            return false;
+        }
+        return this.SRI.equals(((ShadowEntity) o).getSRI());
     }
 
     public void setSRI(String SRI) {
@@ -84,26 +98,6 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
 
     public void setEntityTopic(String entityTopic) {
         this.entityTopic = entityTopic;
-    }
-
-    /**
-     * @Description 生成影子SRI
-     * @return SRI
-     * @author szh
-     * @Date 2019/6/16 19:37
-     */
-    public void generateSRI() {
-        this.SRI = this.getClass().getSimpleName() + "_" +
-                System.currentTimeMillis() + "_" +
-                (int) (Math.random() * 1000);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof ShadowEntity)) {
-            return false;
-        }
-        return this.SRI.equals(((ShadowEntity) o).getSRI());
     }
 
 }

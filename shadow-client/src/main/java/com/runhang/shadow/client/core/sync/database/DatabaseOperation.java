@@ -4,7 +4,6 @@ import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.common.utils.DatabaseUtils;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

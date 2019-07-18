@@ -83,6 +83,15 @@ public class ClassUtils {
             Field field = obj.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             return field.get(obj);
+        } catch (NoSuchFieldException e) {
+            try {
+                Field field = obj.getClass().getSuperclass().getDeclaredField(fieldName);
+                field.setAccessible(true);
+                return field.get(obj);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return null;
+            }
         } catch (Exception e) {
             log.error(e.getMessage());
             return null;

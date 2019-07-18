@@ -18,7 +18,7 @@ public class Vending extends ShadowEntity {
     }
 
     public Vending() {
-
+        super();
     }
 
     public Vending(String topic) throws Exception {

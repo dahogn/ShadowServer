@@ -145,7 +145,7 @@ public class ShadowService {
         for (int i = 0; i < 8121; i++) {
             Vending vending = vendingList.get(i);
             String name = "new_" + vending.getName();
-            String url = String.format("http://192.168.0.106:8090/benchmark/db/vending?vendingId=%s&name=%s", vending.getId(), name);
+            String url = String.format("http://192.168.0.106:8090/benchmark/db/vending?vendingId=%s&name=%s", i + 1, name);
             urlList.add(url);
 
             if (0 != i && i % 1000 == 0) {

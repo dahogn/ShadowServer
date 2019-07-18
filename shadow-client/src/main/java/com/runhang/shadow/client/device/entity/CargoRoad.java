@@ -19,7 +19,7 @@ public class CargoRoad extends ShadowEntity {
     }
 
     public CargoRoad() {
-
+        super();
     }
 
     public CargoRoad(String topic) throws Exception {

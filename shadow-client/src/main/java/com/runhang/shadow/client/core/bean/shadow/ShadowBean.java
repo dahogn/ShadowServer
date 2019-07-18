@@ -126,7 +126,10 @@ public class ShadowBean {
 
             // 增加
             for (ShadowField addField : updateValue.getAdd()) {
-                if (null != addField.getParentSri() && EntityFactory.isSriExist(addField.getParentSri())) {
+                // 父类实体存在且要添加的实体不存在
+                if (!StringUtils.isEmpty(addField.getParentSri()) &&
+                        EntityFactory.isSriExist(addField.getParentSri()) &&
+                        !EntityFactory.isSriExist(addField.getSri())) {
                     // 获取父类实体
                     ShadowEntity parentEntity = EntityFactory.getEntity(addField.getParentSri());
                     // 实体补充sri和topic

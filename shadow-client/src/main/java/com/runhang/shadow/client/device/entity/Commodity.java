@@ -23,7 +23,7 @@ public class Commodity extends ShadowEntity {
     }
 
     public Commodity() {
-
+        super();
     }
 
     public Commodity(String topic) throws Exception {
