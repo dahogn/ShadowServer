@@ -9,7 +9,9 @@ import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -50,8 +52,20 @@ public class ShadowUtils {
      * @Date 2019/5/2 20:46
      */
     public static synchronized ShadowEntity getShadow(String topic) {
+        /** 获取影子对象 */
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
+        /** 获取影子对象的信号量 */
         Semaphore semaphore = ShadowFactory.getSemaphore(topic);
+        /** 设置线程使用的topic*/
+        String threadName = Thread.currentThread().getName();
+        List<String> threadTopics = ShadowFactory.getThreadTopic(threadName);
+        if (threadTopics == null){
+            threadTopics = new ArrayList<String>();
+            threadTopics.add(topic);
+            Map<String,List<String>> threadMap = ShadowFactory.getThreadMap();
+            threadMap.put(threadName,threadTopics);
+        }
+        threadTopics.add(topic);
         System.out.println(Thread.currentThread().getName() + " 信号量余量 " + semaphore.availablePermits());
         try{
             if (null != shadowBean && null != semaphore) {
@@ -85,9 +99,6 @@ public class ShadowUtils {
 //            // 保存到数据库
 //            DatabaseQueue.amqpSave(shadowBean.getData());
 //        }
-        Semaphore semaphore = ShadowFactory.getSemaphore(topic);
-        semaphore.release();
-        ShadowUtils.class.notifyAll();
         return errorCode;
     }
 
@@ -110,9 +121,6 @@ public class ShadowUtils {
             // 下发状态
             controlPush.push(topic, shadowBean.getDoc(), current);
         }
-        Semaphore semaphore = ShadowFactory.getSemaphore(topic);
-        semaphore.release();
-        ShadowUtils.class.notifyAll();
         return error;
     }
 
@@ -137,4 +145,14 @@ public class ShadowUtils {
         return null;
     }
 
+
+    /**
+     * 释放信号量
+     * @param topic
+     */
+    public static synchronized  void releaseSemaphore(String topic){
+        Semaphore semaphore = ShadowFactory.getSemaphore(topic);
+        semaphore.release();
+        ShadowUtils.class.notifyAll();
+    }
 }
