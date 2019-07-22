@@ -39,7 +39,7 @@ public class ShadowDesiredDoc {
      * @author szh
      * @Date 2019/6/25 14:57
      */
-    public void clearDesired() {
+    void clearDesired() {
         add.clear();
         delete.clear();
         update.clear();

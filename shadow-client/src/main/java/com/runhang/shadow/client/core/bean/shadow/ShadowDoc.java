@@ -52,4 +52,13 @@ public class ShadowDoc {
         return new ReState(state.getDesired());
     }
 
+    /**
+     * @Description 清空期望数据
+     * @author szh
+     * @Date 2019/7/22 16:03
+     */
+    void clearDesired() {
+        state.getDesired().clearDesired();
+    }
+
 }

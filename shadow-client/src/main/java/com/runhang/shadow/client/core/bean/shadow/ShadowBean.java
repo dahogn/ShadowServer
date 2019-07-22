@@ -177,7 +177,7 @@ public class ShadowBean {
                             boolean updateSuccess = ClassUtils.setValue(entity, fieldName, updateField.getField().get(fieldName));
                             if (!updateSuccess) {
                                 // 影子属性回退
-                                shadowRevert();
+                                shadowCommitRevert();
                                 return ReErrorCode.SHADOW_ATTR_WRONG;
                             } else {
                                 // metadata
@@ -224,7 +224,7 @@ public class ShadowBean {
         rwLock.writeLock().lock();
         try {
             // 清空desire
-            doc.getState().getDesired().clearDesired();
+            doc.clearDesired();
             // 清空变更
             shadowField.clear();
             if (null != doc.getMetadata()) {
@@ -255,9 +255,6 @@ public class ShadowBean {
             List<String> entityNames = ClassUtils.getAllEntityName();
             compareAttr(data, (ShadowEntity) doc.getState().getReported(data.getClass()), entityNames);
 
-            // 回退影子对象，当设备端修改成功之后才更改影子对象
-            shadowRevert();
-
             // 更新文档
             // desired
             for (ShadowField sf : shadowField.values()) {
@@ -282,6 +279,9 @@ public class ShadowBean {
                 doc.getMetadata().getDesired().put(sri, metadataTime);
             }
 
+            // 回退影子对象，当设备端修改成功之后才更改影子对象
+            shadowCommitRevert();
+
             // 更新时间戳
             doc.setTimestamp(timestamp);
             // 更新版本
@@ -294,11 +294,11 @@ public class ShadowBean {
     }
 
     /**
-     * @Description 影子版本回退
+     * @Description 影子提交修改部分版本回退
      * @author szh
      * @Date 2019/4/30 17:15
      */
-    private void shadowRevert() {
+    private void shadowCommitRevert() {
         for (ShadowField sf : shadowField.values()) {
             switch (sf.getOperation()) {
                 case ADD:
@@ -330,6 +330,23 @@ public class ShadowBean {
                     break;
             }
         }
+        // 清空变更
+        shadowField.clear();
+    }
+
+    /**
+     * @Description 影子版本全部回退
+     * @author szh
+     * @Date 2019/7/22 16:00
+     */
+    public void shadowRevert() throws NoSriException {
+        // 对照list的变更
+        List<String> entityNames = ClassUtils.getAllEntityName();
+        compareAttr(data, (ShadowEntity) doc.getState().getReported(data.getClass()), entityNames);
+        // 回退影子对象
+        shadowCommitRevert();
+        // 清空期望数据
+        clearDesired();
     }
 
     /**
