@@ -6,7 +6,7 @@ package com.runhang.shadow.client.core.enums;
 public enum ReErrorCode {
 
     WRONG_JSON_FORMAT("400", "不正确的JSON格式"),
-    LACK_MATHOD("401", "影子JSON缺少method信息"),
+    LACK_METHOD("401", "影子JSON缺少method信息"),
     LACK_STATE("402", "影子JSON缺少state字段"),
     VERSION_NOT_NUM("403", "影子JSON version不是数字"),
     LACK_REPORTED("404", "影子JSON缺少reported字段"),

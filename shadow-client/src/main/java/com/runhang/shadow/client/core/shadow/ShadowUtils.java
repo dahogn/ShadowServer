@@ -60,7 +60,7 @@ public class ShadowUtils {
         String threadName = Thread.currentThread().getName();
         List<String> threadTopics = ShadowFactory.getThreadTopic(threadName);
         if (threadTopics == null){
-            threadTopics = new ArrayList<String>();
+            threadTopics = new ArrayList<>();
             threadTopics.add(topic);
             Map<String,List<String>> threadMap = ShadowFactory.getThreadMap();
             threadMap.put(threadName,threadTopics);
@@ -82,6 +82,19 @@ public class ShadowUtils {
             return null;
         }
 
+    }
+
+    /**
+     * @Description 持久化实体修改
+     * @param topic 主题
+     * @author szh
+     * @Date 2019/7/22 16:30
+     */
+    public static void save(String topic) {
+        ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
+        if (null != shadowBean) {
+            DatabaseQueue.amqpSave(shadowBean.getData());
+        }
     }
 
     /**
