@@ -54,31 +54,35 @@ public class ShadowUtils {
     public static synchronized ShadowEntity getShadow(String topic) {
         /** 获取影子对象 */
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
-        /** 获取影子对象的信号量 */
-        Semaphore semaphore = ShadowFactory.getSemaphore(topic);
-        /** 设置线程使用的topic*/
-        String threadName = Thread.currentThread().getName();
-        List<String> threadTopics = ShadowFactory.getThreadTopic(threadName);
-        if (threadTopics == null){
-            threadTopics = new ArrayList<>();
+        if (null != shadowBean) {
+            /** 获取影子对象的信号量 */
+            Semaphore semaphore = ShadowFactory.getSemaphore(topic);
+            /** 设置线程使用的topic*/
+            String threadName = Thread.currentThread().getName();
+            List<String> threadTopics = ShadowFactory.getThreadTopic(threadName);
+            if (threadTopics == null) {
+                threadTopics = new ArrayList<>();
+                threadTopics.add(topic);
+                Map<String, List<String>> threadMap = ShadowFactory.getThreadMap();
+                threadMap.put(threadName, threadTopics);
+            }
             threadTopics.add(topic);
-            Map<String,List<String>> threadMap = ShadowFactory.getThreadMap();
-            threadMap.put(threadName,threadTopics);
-        }
-        threadTopics.add(topic);
-        System.out.println(Thread.currentThread().getName() + " 信号量余量 " + semaphore.availablePermits());
-        try{
-            if (null != shadowBean && null != semaphore) {
-                while (!semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)){
-                    ShadowUtils.class.wait();
+//            System.out.println(Thread.currentThread().getName() + " 信号量余量 " + semaphore.availablePermits());
+            try {
+                if (null != semaphore) {
+                    while (!semaphore.tryAcquire(100, TimeUnit.MILLISECONDS)) {
+                        ShadowUtils.class.wait();
+                    }
+                    return shadowBean.getData();
+                } else {
+                    return null;
                 }
-                return shadowBean.getData();
-            } else {
+            } catch (Exception e) {
+                e.printStackTrace();
+                semaphore.release();
                 return null;
             }
-        }catch(Exception e){
-            e.printStackTrace();
-            semaphore.release();
+        } else {
             return null;
         }
 
@@ -106,13 +110,16 @@ public class ShadowUtils {
      */
     public static synchronized ReErrorCode commit(String topic) throws NoSriException {
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
-        long current = System.currentTimeMillis();
-        ReErrorCode errorCode = shadowBean.updateShadowByServer(current);
+        if (null != shadowBean) {
+            long current = System.currentTimeMillis();
+            return shadowBean.updateShadowByServer(current);
 //        if (null == errorCode) {
 //            // 保存到数据库
 //            DatabaseQueue.amqpSave(shadowBean.getData());
 //        }
-        return errorCode;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -124,17 +131,21 @@ public class ShadowUtils {
      */
     public static synchronized ReErrorCode commitAndPush(String topic) throws NoSriException {
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
-        long current = System.currentTimeMillis();
-        ReErrorCode error = shadowBean.updateShadowByServer(current);
-        if (null == error) {
-            // 保存到数据库
+        if (null != shadowBean) {
+            long current = System.currentTimeMillis();
+            ReErrorCode error = shadowBean.updateShadowByServer(current);
+            if (null == error) {
+                // 保存到数据库
 //            DatabaseQueue.amqpSave(shadowBean.getData());
-            // 更新版本
-            shadowBean.getDoc().addUpVersion();
-            // 下发状态
-            controlPush.push(topic, shadowBean.getDoc(), current);
+                // 更新版本
+                shadowBean.getDoc().addUpVersion();
+                // 下发状态
+                controlPush.push(topic, shadowBean.getDoc(), current);
+            }
+            return error;
+        } else {
+            return null;
         }
-        return error;
     }
 
     /**
@@ -146,16 +157,31 @@ public class ShadowUtils {
      */
     public static ReErrorCode push(String topic) {
         ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
-        // 检查是否修改
-        if (shadowBean.getDoc().getState().getDesired().isEmpty()) {
-            return ReErrorCode.SHADOW_ATTR_NOT_MODIFIED;
+        if (null != shadowBean) {
+            // 检查是否修改
+            if (shadowBean.getDoc().getState().getDesired().isEmpty()) {
+                return ReErrorCode.SHADOW_ATTR_NOT_MODIFIED;
+            }
+            // 更新版本
+            shadowBean.getDoc().addUpVersion();
+            // 下发
+            long current = shadowBean.getDoc().getTimestamp();
+            controlPush.push(topic, shadowBean.getDoc(), current);
         }
-        // 更新版本
-        shadowBean.getDoc().addUpVersion();
-        // 下发
-        long current = shadowBean.getDoc().getTimestamp();
-        controlPush.push(topic, shadowBean.getDoc(), current);
         return null;
+    }
+
+    /**
+     * @Description 影子回滚
+     * @param topic 主题
+     * @author szh
+     * @Date 2019/7/24 10:27
+     */
+    public static void revert(String topic) throws NoSriException {
+        ShadowBean bean = ShadowFactory.getShadowBean(topic);
+        if (null != bean) {
+            bean.shadowRevert();
+        }
     }
 
 
@@ -163,7 +189,7 @@ public class ShadowUtils {
      * 释放信号量
      * @param topic
      */
-    public static synchronized  void releaseSemaphore(String topic){
+    public static synchronized  void releaseSemaphore(String topic) {
         Semaphore semaphore = ShadowFactory.getSemaphore(topic);
         semaphore.release();
         ShadowUtils.class.notifyAll();

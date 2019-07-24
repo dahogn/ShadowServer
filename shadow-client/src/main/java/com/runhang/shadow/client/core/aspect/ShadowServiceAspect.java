@@ -30,8 +30,6 @@ public class ShadowServiceAspect {
      */
     @After("@annotation(com.runhang.shadow.client.core.aspect.ShadowService)")
     public void dealShadowService(JoinPoint point) {
-        log.warn("deal shadow service");
-        log.info("aspect thread: " + Thread.currentThread().getName());
         String threadName = Thread.currentThread().getName();
         List<String> topics = ShadowFactory.getThreadTopic(threadName);
         if (topics != null){
@@ -50,6 +48,13 @@ public class ShadowServiceAspect {
      */
     @AfterThrowing(value = "@annotation(com.runhang.shadow.client.core.aspect.ShadowService)", throwing = "e")
     public void dealServiceException(JoinPoint point, Exception e) throws Throwable {
+        String threadName = Thread.currentThread().getName();
+        List<String> topics = ShadowFactory.getThreadTopic(threadName);
+        if (topics != null) {
+            for (String topic : topics) {
+                ShadowUtils.revert(topic);
+            }
+        }
         throw e;
     }
 
