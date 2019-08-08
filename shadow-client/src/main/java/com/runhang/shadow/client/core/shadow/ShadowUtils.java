@@ -44,17 +44,10 @@ public class ShadowUtils {
         return shadowSuccess;
     }
 
-    /**
-     * @Description 获取影子对象
-     * @param topic 主题
-     * @return 对象
-     * @author szh
-     * @Date 2019/5/2 20:46
-     */
-    public static synchronized ShadowEntity getShadow(String topic) {
-        /** 获取影子对象 */
-        ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
+    private static ShadowEntity dealGetShadow(ShadowBean shadowBean) {
         if (null != shadowBean) {
+            String topic = shadowBean.getTopic();
+
             /** 获取影子对象的信号量 */
             Semaphore semaphore = ShadowFactory.getSemaphore(topic);
             /** 设置线程使用的topic*/
@@ -85,7 +78,39 @@ public class ShadowUtils {
         } else {
             return null;
         }
+    }
 
+    /**
+     * @Description 获取影子对象
+     * @param topic 主题
+     * @return 对象
+     * @author szh
+     * @Date 2019/5/2 20:46
+     */
+    public static synchronized ShadowEntity getShadow(String topic) {
+        ShadowBean shadowBean = ShadowFactory.getShadowBean(topic);
+        return dealGetShadow(shadowBean);
+
+    }
+
+    /**
+     * @Description 按类型获取影子对象列表
+     * @param dataClass 影子类型
+     * @return 对象列表
+     * @author szh
+     * @Date 2019/8/8 19:13
+     */
+    public static List<ShadowEntity> getShadowList(Class<?> dataClass) {
+        List<ShadowBean> shadowBeans = ShadowFactory.getShadowBeans(dataClass);
+        List<ShadowEntity> shadowEntities = new ArrayList<>();
+
+        for (ShadowBean bean : shadowBeans) {
+            ShadowEntity entity = dealGetShadow(bean);
+            if (null != entity) {
+                shadowEntities.add(entity);
+            }
+        }
+        return shadowEntities;
     }
 
     /**

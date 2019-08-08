@@ -18,12 +18,14 @@ import java.util.concurrent.Semaphore;
 @Slf4j
 public class ShadowFactory {
 
-    /** 保存影子topic与容器id关系 */
+    /** 保存影子topic与容器id关系 key: topic value: id */
     private static Map<String, String> beanMap = new HashMap<>();
+    /** 保存影子对象类名与容器id关系 key: class name value: id list **/
+    private static Map<String, List<String>> classMap = new HashMap<>();
     /** 保存影子的信号量*/
     private static Map<String, Semaphore> semaphoreMap = new HashMap<>();
     /** 保存线程名称与对应的topics*/
-    private static Map<String,List<String>> threadMap = new HashMap<>();
+    private static Map<String, List<String>> threadMap = new HashMap<>();
 
     /**
      * 注入影子到容器
@@ -40,8 +42,16 @@ public class ShadowFactory {
             return false;
         }
         /** 2. bean注入 **/
-        String beanName = bean.getData().getClass().getSimpleName() + "_" + topic;
+        String className = bean.getData().getClass().getSimpleName();
+        String beanName = className + "_" + topic;
+        // 保存topic关系
         beanMap.put(topic, beanName);
+        // 保存类名关系
+        if (classMap.containsKey(className)) {
+            classMap.get(className).add(beanName);
+        } else {
+            classMap.put(className, Collections.singletonList(beanName));
+        }
         // 标注信号量
         semaphoreMap.put(topic,new Semaphore(1));
         BeanUtils.injectExistBean(bean, beanName);
@@ -126,8 +136,26 @@ public class ShadowFactory {
      * @date 2019/2/1 18:44
      */
     public static ShadowBean getShadowBean(String topic) {
-        // TODO 通过索引和类名两种方式检索
         return (ShadowBean) BeanUtils.getBean(beanMap.get(topic));
+    }
+
+    /**
+     * @Description 通过影子数据类型获取影子列表
+     * @param dataClass 影子数据两类型
+     * @return 影子列表
+     * @author szh
+     * @Date 2019/8/8 13:11
+     */
+    static List<ShadowBean> getShadowBeans(Class<?> dataClass) {
+        List<ShadowBean> beanList = new ArrayList<>();
+        String className = dataClass.getSimpleName();
+
+        if (classMap.containsKey(className)) {
+            for (String id : classMap.get(className)) {
+                beanList.add((ShadowBean) BeanUtils.getBean(id));
+            }
+        }
+        return beanList;
     }
 
     /**
