@@ -44,6 +44,13 @@ public class ShadowUtils {
         return shadowSuccess;
     }
 
+    /**
+     * @Description 获取影子时加锁
+     * @param shadowBean 影子
+     * @return 影子对象
+     * @author szh
+     * @Date 2019/8/9 23:42
+     */
     private static ShadowEntity dealGetShadow(ShadowBean shadowBean) {
         if (null != shadowBean) {
             String topic = shadowBean.getTopic();
@@ -209,14 +216,25 @@ public class ShadowUtils {
         }
     }
 
-
     /**
      * 释放信号量
-     * @param topic
+     * @param topic 影子主题
      */
-    public static synchronized  void releaseSemaphore(String topic) {
+    public static synchronized void releaseSemaphore(String topic) {
         Semaphore semaphore = ShadowFactory.getSemaphore(topic);
         semaphore.release();
         ShadowUtils.class.notifyAll();
     }
+
+    /**
+     * @Description 通过sri获得实体
+     * @param sri 影子标识
+     * @return 实体
+     * @author szh
+     * @Date 2019/8/9 23:41
+     */
+    public static ShadowEntity getEntity(String sri) {
+        return EntityFactory.getEntity(sri);
+    }
+
 }
