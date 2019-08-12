@@ -3,8 +3,9 @@ import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 import { Table, Card } from "antd";
 import styles from '../../common/common.less';
 import { connect } from 'dva';
+import { routerRedux } from 'dva/router';
 
-@connect(({ vending }) => ({ vending }))
+@connect(({ vending, cargoRoad }) => ({ vending, cargoRoad }))
 export default class Vending extends Component {
 
   componentWillMount() {
@@ -13,6 +14,15 @@ export default class Vending extends Component {
       type: 'vending/getVendingList',
     });
   }
+
+  handleClickVending = (record) => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'cargoRoad/setVending',
+      payload: record,
+    });
+    dispatch(routerRedux.push('/cargoRoad'));
+  };
 
   render() {
 
@@ -39,6 +49,14 @@ export default class Vending extends Component {
         dataIndex: 'cargoRoadNum',
         key: 'cargoRoadNum',
       },
+      {
+        title: '操作',
+        dataIndex: 'operation',
+        key: 'operation',
+        render: (text, record) => (
+            <a type="dashed" onClick={() => this.handleClickVending(record)}>查看货道</a>
+        )
+      }
     ];
 
     return (

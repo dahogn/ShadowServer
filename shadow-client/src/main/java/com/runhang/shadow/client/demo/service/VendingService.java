@@ -21,6 +21,12 @@ import java.util.List;
 @Slf4j
 public class VendingService {
 
+    /**
+     * @Description 获取所有售货机
+     * @return 售货机列表
+     * @author szh
+     * @Date 2019/8/12 15:31
+     */
     @ShadowService
     public List<VendingSimpleInfo> getVendingList() {
         List<ShadowEntity> shadowEntities = ShadowUtils.getShadowList(Vending.class);
