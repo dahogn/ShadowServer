@@ -2,6 +2,7 @@ package com.runhang.shadow.client.demo.api;
 
 import com.alibaba.fastjson.JSON;
 import com.runhang.shadow.client.demo.service.CargoRoadService;
+import com.runhang.shadow.client.demo.service.CommodityService;
 import com.runhang.shadow.client.demo.service.VendingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ public class VendingApi {
     private VendingService vendingService;
     @Autowired
     private CargoRoadService cargoRoadService;
+    @Autowired
+    private CommodityService commodityService;
 
     /**
      * @Description 获取所有售货机
@@ -48,6 +51,18 @@ public class VendingApi {
     @ResponseBody
     public String getCargoRoadList(@RequestParam("vendingId") String vendingId) {
         return JSON.toJSONString(cargoRoadService.getCargoRoadList(vendingId));
+    }
+
+    /**
+     * @Description 获取商品列表
+     * @param cargoRoadId 货道sri
+     * @author szh
+     * @Date 2019/8/12 17:11
+     */
+    @GetMapping("commodity")
+    @ResponseBody
+    public String getCommodityList(@RequestParam("cargoRoadId") String cargoRoadId) {
+        return JSON.toJSONString(commodityService.getCommodityList(cargoRoadId));
     }
 
 }

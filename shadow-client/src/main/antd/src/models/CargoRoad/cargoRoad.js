@@ -1,4 +1,4 @@
-import { getCargoRoadList } from "../../services/CargoRoad/cargoRoad";
+import { getCargoRoadList, getCommodityList } from "../../services/CargoRoad/cargoRoad";
 
 export default {
   namespace: 'cargoRoad',
@@ -6,6 +6,9 @@ export default {
   state: {
     vending: {},
     cargoRoadList: [],
+    commodityModalVisible: false,
+    commodityList: [],
+    cargoRoadId: '',
   },
 
   effects: {
@@ -15,7 +18,14 @@ export default {
         type: 'setCargoRoadList',
         payload: response,
       });
-    }
+    },
+    *fetchCommodity({ payload }, { call, put }) {
+      const response = yield call(getCommodityList, payload);
+      yield put({
+        type: 'setCommodityList',
+        payload: response,
+      });
+    },
   },
 
   reducers: {
@@ -30,6 +40,24 @@ export default {
         ...state,
         cargoRoadList: payload,
       };
-    }
+    },
+    setCommodityModalVisible(state, { payload }) {
+      return {
+        ...state,
+        commodityModalVisible: payload,
+      };
+    },
+    setCommodityList(state, { payload }) {
+      return {
+        ...state,
+        commodityList: payload,
+      };
+    },
+    setCargoRoadId(state, { payload }) {
+      return {
+        ...state,
+        cargoRoadId: payload,
+      };
+    },
   }
 }
