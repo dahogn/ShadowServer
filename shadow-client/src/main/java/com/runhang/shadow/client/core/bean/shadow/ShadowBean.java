@@ -80,7 +80,7 @@ public class ShadowBean {
      * @Date 2019/6/19 14:28
      */
     public void addModifiedField(ShadowField field) {
-        if (shadowField.keySet().contains(field.getSri())) {
+        if (shadowField.containsKey(field.getSri())) {
             // 更新值
             Map<String, Object> f = shadowField.get(field.getSri()).getField();
             f.putAll(field.getField());
@@ -358,6 +358,9 @@ public class ShadowBean {
      * @Date 2019/6/26 19:01
      */
     private void compareAttr(ShadowEntity entity, ShadowEntity doc, List<String> entityNames) throws NoSriException {
+        if (null == entity) {
+            return;
+        }
         // 检查实体sri
         if (StringUtils.isEmpty(entity.getSRI())) {
             throw new NoSriException();
@@ -373,12 +376,26 @@ public class ShadowBean {
                 // 是list属性则比照内存中的对象与影子文档中的不同
                 List<ShadowEntity> newList = (List<ShadowEntity>) ClassUtils.getValue(entity, fieldName);
                 List<ShadowEntity> oldList = (List<ShadowEntity>) ClassUtils.getValue(doc, fieldName);
-                compareList(newList, oldList, entity.getSRI(), fieldName, entityNames);
+                if (null != doc) {
+                    compareList(newList, oldList, entity.getSRI(), fieldName, entityNames);
+                }
             } else if (entityNames.contains(fieldType)) {
                 // 是受管理的实体则递归遍历继续比照内部的list
                 ShadowEntity childEntity = (ShadowEntity) ClassUtils.getValue(entity, fieldName);
                 ShadowEntity childDoc = (ShadowEntity) ClassUtils.getValue(doc, fieldName);
                 compareAttr(childEntity, childDoc, entityNames);
+                // 剔除嵌套实体中重复添加的更改记录
+                if (null == childEntity && null != childDoc) {
+                    // 原来是null，赋值新建对象
+                    shadowField.remove(childDoc.getSRI());
+                } else if (null != childEntity && null == childDoc) {
+                    // 原来有值，赋值null
+                    shadowField.remove(childEntity.getSRI());
+                } else if (null != childEntity && !childEntity.equals(childDoc)) {
+                    // 原来有值，赋值新对象
+                    shadowField.remove(childEntity.getSRI());
+                    shadowField.remove(childDoc.getSRI());
+                }
             }
         }
     }

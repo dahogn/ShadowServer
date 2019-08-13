@@ -73,10 +73,7 @@ public class Vending extends ShadowEntity {
     private List<CargoRoad> cargoRoad;
 
     public void setCargoRoad(List<CargoRoad> cargoRoad) {
-        EntityField field = new EntityField("Vending", "cargoRoad", this.cargoRoad);
         this.cargoRoad = cargoRoad;
-        field.setFieldValue(field);
-        notifyObservers(databaseFieldMap.get("cargoRoad"), field);
     }
 
     public List<CargoRoad> getCargoRoad() {
