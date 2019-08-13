@@ -40,6 +40,7 @@ public class EntityFactory {
      * @Description 注入影子的各个部分
      * @param shadowEntity 影子部分实体
      * @throws NoTopicException 实体无主题异常
+     * @throws NoSriException 实体无sri异常
      * @return 是否成功
      * @author szh
      * @Date 2019/6/16 19:51
@@ -72,6 +73,10 @@ public class EntityFactory {
      */
     public static void injectEntities(ShadowEntity shadowEntity, String topic,
                                       List<String> entityNames) throws NoTopicException, NoSriException {
+        // 实体sri不合法就生成一个
+        if (!shadowEntity.checkSRI()) {
+            shadowEntity.generateSRI();
+        }
         // 注入自身
         shadowEntity.setEntityTopic(topic);
         injectEntity(shadowEntity);

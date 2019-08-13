@@ -4,11 +4,13 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.runhang.shadow.client.core.shadow.EntityFactory;
 import com.runhang.shadow.client.core.shadow.ShadowSubject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.regex.Pattern;
 
 /**
  * @ClassName ShadowEntity
@@ -63,10 +65,34 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
      * @Date 2019/6/16 19:37
      */
     public void generateSRI() {
+        /*
+        sri三部分：
+        1. 当前实体类名
+        2. 13位时间戳
+        3. 3位随机数，不足3位前面补0
+         */
         int random = (int) (Math.random() * 1000);
         this.SRI = this.getClass().getSimpleName() + "_" +
                 System.currentTimeMillis() + "_" +
                 String.format("%03d", random);
+    }
+
+    /**
+     * @Description sri是否合法
+     * @author szh
+     * @Date 2019/8/13 10:28
+     */
+    public boolean checkSRI() {
+        if (StringUtils.isEmpty(this.SRI)) {
+            return false;
+        }
+        String[] sriPart = this.SRI.split("_");
+        // 校验sri三部分
+        return 3 == sriPart.length &&
+                this.getClass().getSimpleName().equals(sriPart[0]) &&
+                Pattern.matches("^[0-9]{13}$", sriPart[1]) &&
+                Pattern.matches("^[0-9]{3}$", sriPart[2]);
+
     }
 
     /**
