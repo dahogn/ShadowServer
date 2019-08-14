@@ -48,7 +48,7 @@ export default class CommodityTableForm extends PureComponent {
       sri: key,
       name: '',
       num: 0,
-      price: 0.00,
+      price: 0.0,
       editable: true,
       isNew: true,
     });
@@ -64,11 +64,8 @@ export default class CommodityTableForm extends PureComponent {
     const newData = this.state.data.map(item => ({ ...item }));
     const target = this.getRowByKey(key, newData);
     if (target) {
-      if (typeof(e) === "number" || e.target === undefined) {
-        target[fieldName] = e;
-      } else {
-        target[fieldName] = e.target.value;
-      }
+      // target[fieldName] = e.target.value;
+      target[fieldName] = e;
       this.setState({ data: newData });
     }
   }
@@ -148,7 +145,7 @@ export default class CommodityTableForm extends PureComponent {
             return (
               <Input
                 value={text}
-                onChange={e => this.handleFieldChange(e, 'name', record.sri)}
+                onChange={e => this.handleFieldChange(e.target.value, 'name', record.sri)}
                 onKeyPress={e => this.handleKeyPress(e, record.sri)}
                 placeholder="商品名称"
               />
@@ -179,7 +176,6 @@ export default class CommodityTableForm extends PureComponent {
           } else {
             return text;
           }
-
         },
       },
       {
@@ -223,10 +219,7 @@ export default class CommodityTableForm extends PureComponent {
                 <span>
                   <a onClick={e => this.saveRow(e, record.sri)}>添加</a>
                   <Divider type="vertical" />
-                  <Popconfirm
-                    title="是否要删除此行？"
-                    onConfirm={() => this.remove(record.sri)}
-                  >
+                  <Popconfirm title="是否要删除此行？" onConfirm={() => this.remove(record.sri)}>
                     <a>删除</a>
                   </Popconfirm>
                 </span>
@@ -244,10 +237,7 @@ export default class CommodityTableForm extends PureComponent {
             <span>
               <a onClick={e => this.toggleEditable(e, record.sri)}>编辑</a>
               <Divider type="vertical" />
-              <Popconfirm
-                title="是否要删除此行？"
-                onConfirm={() => this.remove(record.sri)}
-              >
+              <Popconfirm title="是否要删除此行？" onConfirm={() => this.remove(record.sri)}>
                 <a>删除</a>
               </Popconfirm>
             </span>
