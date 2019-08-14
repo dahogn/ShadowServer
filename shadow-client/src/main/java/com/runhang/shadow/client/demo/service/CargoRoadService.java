@@ -2,6 +2,7 @@ package com.runhang.shadow.client.demo.service;
 
 import com.runhang.shadow.client.core.aspect.ShadowService;
 import com.runhang.shadow.client.core.shadow.ShadowUtils;
+import com.runhang.shadow.client.demo.entity.param.CargoRoadParam;
 import com.runhang.shadow.client.demo.entity.result.CargoRoadSimpleInfo;
 import com.runhang.shadow.client.device.entity.CargoRoad;
 import com.runhang.shadow.client.device.entity.Vending;
@@ -39,6 +40,31 @@ public class CargoRoadService {
             }
         }
         return cargoRoadList;
+    }
+    
+    /**
+     * @Description 新增货道
+     * @param param 货道详情
+     * @author szh
+     * @Date 2019/8/13 20:50       
+     */
+    @ShadowService
+    public String addCargoRoad(CargoRoadParam param) {
+        Vending vending = (Vending) ShadowUtils.getEntity(param.getVendingSri());
+        CargoRoad cargoRoad = param.getCargoRoad(vending.getTopic());
+        if (null != vending.getCargoRoad()) {
+            vending.getCargoRoad().add(cargoRoad);
+        } else {
+            List<CargoRoad> cargoRoadList = new ArrayList<>();
+            vending.setCargoRoad(cargoRoadList);
+        }
+
+        try {
+            ShadowUtils.commitAndPush(vending.getTopic());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return "success";
     }
 
 }

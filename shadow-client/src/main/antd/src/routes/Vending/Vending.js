@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
-import { Table, Card } from "antd";
+import { Table, Card, Button, Divider } from "antd";
 import styles from '../../common/common.less';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
@@ -9,6 +9,13 @@ import { routerRedux } from 'dva/router';
 export default class Vending extends Component {
 
   componentWillMount() {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'vending/getVendingList',
+    });
+  }
+
+  refresh() {
     const { dispatch } = this.props;
     dispatch({
       type: 'vending/getVendingList',
@@ -63,6 +70,10 @@ export default class Vending extends Component {
       <PageHeaderLayout title="售货机管理">
         <Card bordered={ false }>
           <div className={styles.tableList}>
+            <Button icon="reload" onClick={() => this.refresh()}>刷新</Button>
+
+            <Divider style={{ marginBottom: 32 }} />
+
             <Table
               rowKey={ record => record.sri }
               dataSource={ vendingList }

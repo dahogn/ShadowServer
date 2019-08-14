@@ -7,3 +7,10 @@ export async function getCargoRoadList(params) {
 export async function getCommodityList(params) {
   return request('/demo/commodity?cargoRoadId=' + params, { method: 'GET' });
 }
+
+export async function addCargoRoad(params) {
+  return request('/demo/cargoRoad', {
+    method: 'POST',
+    body: params,
+  });
+}

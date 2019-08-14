@@ -33,7 +33,7 @@ public class CommodityService {
         List<CommoditySimpleInfo> commodityList = new ArrayList<>();
         CargoRoad cargoRoad = (CargoRoad) ShadowUtils.getEntity(cargoRoadId);
 
-        if (null != cargoRoad) {
+        if (null != cargoRoad && null != cargoRoad.getCommodity()) {
             for (Commodity commodity : cargoRoad.getCommodity()) {
                 CommoditySimpleInfo info = new CommoditySimpleInfo(commodity);
                 commodityList.add(info);

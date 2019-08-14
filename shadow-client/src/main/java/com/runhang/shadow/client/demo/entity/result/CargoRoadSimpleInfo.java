@@ -25,8 +25,10 @@ public class CargoRoadSimpleInfo {
         this.sri = cargoRoad.getSRI();
         this.serial = cargoRoad.getSerial();
         int num = 0;
-        for (Commodity commodity : cargoRoad.getCommodity()) {
-            num += commodity.getNumber();
+        if (null != cargoRoad.getCommodity()) {
+            for (Commodity commodity : cargoRoad.getCommodity()) {
+                num += commodity.getNumber();
+            }
         }
         this.commodityNum = num;
     }

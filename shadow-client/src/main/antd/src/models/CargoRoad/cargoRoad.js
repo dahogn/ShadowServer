@@ -1,4 +1,5 @@
-import { getCargoRoadList, getCommodityList } from "../../services/CargoRoad/cargoRoad";
+import { notification } from 'antd';
+import { getCargoRoadList, getCommodityList, addCargoRoad } from "../../services/CargoRoad/cargoRoad";
 
 export default {
   namespace: 'cargoRoad',
@@ -9,6 +10,7 @@ export default {
     commodityModalVisible: false,
     commodityList: [],
     cargoRoadId: '',
+    addCargoRoadVisible: false,
   },
 
   effects: {
@@ -25,6 +27,12 @@ export default {
         type: 'setCommodityList',
         payload: response,
       });
+    },
+    *addCargoRoad({ callback, payload }, { call }) {
+      const response = yield call(addCargoRoad, payload);
+      if (callback) {
+        callback();
+      }
     },
   },
 
@@ -57,6 +65,12 @@ export default {
       return {
         ...state,
         cargoRoadId: payload,
+      };
+    },
+    setAddCargoRoadVisible(state, { payload }) {
+      return {
+        ...state,
+        addCargoRoadVisible: payload,
       };
     },
   }
