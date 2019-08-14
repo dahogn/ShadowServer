@@ -13,7 +13,7 @@ import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.model.ShadowField;
 import com.runhang.shadow.client.core.shadow.EntityFactory;
 import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
-import com.runhang.shadow.client.device.entity.ShadowEntity;
+import com.runhang.shadow.client.core.shadow.ShadowEntity;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

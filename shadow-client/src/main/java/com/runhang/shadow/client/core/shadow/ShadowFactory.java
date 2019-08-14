@@ -4,7 +4,6 @@ import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.core.bean.shadow.ShadowBean;
 import com.runhang.shadow.client.core.mqtt.MqttTopicFactory;
 import com.runhang.shadow.client.core.mqtt.TopicUtils;
-import com.runhang.shadow.client.device.entity.ShadowEntity;
 import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 import java.util.concurrent.Semaphore;

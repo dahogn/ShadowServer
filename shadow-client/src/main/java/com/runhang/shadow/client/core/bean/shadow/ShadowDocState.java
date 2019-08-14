@@ -1,7 +1,7 @@
 package com.runhang.shadow.client.core.bean.shadow;
 
 import com.alibaba.fastjson.JSONObject;
-import com.runhang.shadow.client.device.entity.ShadowEntity;
+import com.runhang.shadow.client.core.shadow.ShadowEntity;
 
 /**
  * @ClassName ShadowDocState

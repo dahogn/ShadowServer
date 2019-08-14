@@ -1,7 +1,7 @@
 package com.runhang.shadow.client.core.bean.comm;
 
 import com.runhang.shadow.client.core.bean.shadow.ShadowDesiredDoc;
-import com.runhang.shadow.client.device.entity.ShadowEntity;
+import com.runhang.shadow.client.core.shadow.ShadowEntity;
 import lombok.Data;
 
 /**

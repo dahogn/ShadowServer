@@ -2,6 +2,7 @@ package com.runhang.shadow.client.device.entity;
 
 import com.runhang.shadow.client.core.model.DatabaseField;
 import com.runhang.shadow.client.core.model.EntityField;
+import com.runhang.shadow.client.core.shadow.ShadowEntity;
 
 import javax.persistence.*;
 import java.util.*;
@@ -28,31 +29,14 @@ public class Vending extends ShadowEntity {
     private String name;
 
     public void setName(String name) {
-        /* 上写锁 */
-        lock.writeLock().lock();
-        try{
-            EntityField field = new EntityField("Vending", "name", this.name);
-            this.name = name;
-            field.setFieldValue(name);
-            notifyObservers(databaseFieldMap.get("name"), field);
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            lock.writeLock().unlock();
-        }
+        EntityField field = new EntityField("Vending", "name", this.name);
+        this.name = name;
+        field.setFieldValue(name);
+        notifyObservers(databaseFieldMap.get("name"), field);
     }
 
     public String getName() {
-        /* 上读锁 */
-        lock.readLock().lock();
-        try {
-            return name;
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            lock.readLock().unlock();
-        }
-        return null;
+        return name;
     }
 
     private String topic;

@@ -3,7 +3,7 @@ package com.runhang.shadow.client.device.init;
 import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.shadow.EntityFactory;
 import com.runhang.shadow.client.core.shadow.ShadowFactory;
-import com.runhang.shadow.client.device.entity.ShadowEntity;
+import com.runhang.shadow.client.core.shadow.ShadowEntity;
 import com.runhang.shadow.client.device.entity.Vending;
 import com.runhang.shadow.client.device.repository.*;
 import lombok.extern.slf4j.Slf4j;

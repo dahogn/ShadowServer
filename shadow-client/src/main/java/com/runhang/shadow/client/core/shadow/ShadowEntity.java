@@ -1,15 +1,11 @@
-package com.runhang.shadow.client.device.entity;
+package com.runhang.shadow.client.core.shadow;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.runhang.shadow.client.core.shadow.EntityFactory;
-import com.runhang.shadow.client.core.shadow.ShadowSubject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
 /**
@@ -21,9 +17,6 @@ import java.util.regex.Pattern;
 @Slf4j
 @MappedSuperclass
 public class ShadowEntity extends ShadowSubject implements Serializable {
-
-    @Transient
-    ReadWriteLock lock = new ReentrantReadWriteLock();
 
     /**
      * Shadow Resource Identifier
@@ -42,7 +35,7 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
     private String entityTopic;
 
 
-    ShadowEntity() {
+    public ShadowEntity() {
         generateSRI();
     }
 
@@ -82,7 +75,7 @@ public class ShadowEntity extends ShadowSubject implements Serializable {
      * @author szh
      * @Date 2019/8/13 10:28
      */
-    public boolean checkSRI() {
+    boolean checkSRI() {
         if (StringUtils.isEmpty(this.SRI)) {
             return false;
         }

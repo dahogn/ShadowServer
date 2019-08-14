@@ -4,7 +4,6 @@ import com.runhang.shadow.client.common.utils.BeanUtils;
 import com.runhang.shadow.client.common.utils.ClassUtils;
 import com.runhang.shadow.client.core.exception.NoSriException;
 import com.runhang.shadow.client.core.exception.NoTopicException;
-import com.runhang.shadow.client.device.entity.ShadowEntity;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;

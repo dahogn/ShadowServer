@@ -1,7 +1,7 @@
 package com.runhang.shadow.client.common.utils;
 
 import cn.hutool.core.lang.ClassScaner;
-import com.runhang.shadow.client.device.entity.ShadowEntity;
+import com.runhang.shadow.client.core.shadow.ShadowEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 

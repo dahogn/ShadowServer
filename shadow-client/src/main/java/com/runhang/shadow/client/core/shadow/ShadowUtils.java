@@ -7,7 +7,6 @@ import com.runhang.shadow.client.core.exception.NoSriException;
 import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
-import com.runhang.shadow.client.device.entity.ShadowEntity;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;

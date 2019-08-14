@@ -145,6 +145,7 @@ export default class CommodityTableForm extends PureComponent {
             return (
               <Input
                 value={text}
+                autoFocus
                 onChange={e => this.handleFieldChange(e.target.value, 'name', record.sri)}
                 onKeyPress={e => this.handleKeyPress(e, record.sri)}
                 placeholder="商品名称"

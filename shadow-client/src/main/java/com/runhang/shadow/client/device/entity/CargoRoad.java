@@ -1,6 +1,7 @@
 package com.runhang.shadow.client.device.entity;
 
 import com.runhang.shadow.client.core.model.DatabaseField;
+import com.runhang.shadow.client.core.shadow.ShadowEntity;
 
 import javax.persistence.*;
 import java.util.HashMap;
