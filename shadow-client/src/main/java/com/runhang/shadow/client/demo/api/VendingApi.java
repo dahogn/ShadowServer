@@ -2,6 +2,7 @@ package com.runhang.shadow.client.demo.api;
 
 import com.alibaba.fastjson.JSON;
 import com.runhang.shadow.client.demo.entity.param.CargoRoadParam;
+import com.runhang.shadow.client.demo.entity.param.CommodityParam;
 import com.runhang.shadow.client.demo.service.CargoRoadService;
 import com.runhang.shadow.client.demo.service.CommodityService;
 import com.runhang.shadow.client.demo.service.VendingService;
@@ -73,6 +74,18 @@ public class VendingApi {
     @ResponseBody
     public String getCommodityList(@RequestParam("cargoRoadId") String cargoRoadId) {
         return JSON.toJSONString(commodityService.getCommodityList(cargoRoadId));
+    }
+
+    /**
+     * @Description 修改商品列表
+     * @param param 新的商品列表
+     * @author szh
+     * @Date 2019/8/14 11:14
+     */
+    @PutMapping("commodity")
+    @ResponseBody
+    public String editCommodityList(@RequestBody CommodityParam param) {
+        return commodityService.editCommodityList(param);
     }
 
 }

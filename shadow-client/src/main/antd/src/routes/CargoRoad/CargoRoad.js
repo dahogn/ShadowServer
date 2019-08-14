@@ -62,6 +62,11 @@ export default class CargoRoad extends Component {
   // 修改商品
   handleEditCommodity = record => {
     const { dispatch } = this.props;
+    dispatch({
+      type: 'cargoRoad/editCommodity',
+      payload: record,
+      callback: this.handleEditCommodityCallback,
+    })
   };
 
   // 修改商品回调

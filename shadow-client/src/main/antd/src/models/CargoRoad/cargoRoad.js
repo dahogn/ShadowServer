@@ -1,5 +1,4 @@
-import { notification } from 'antd';
-import { getCargoRoadList, getCommodityList, addCargoRoad } from "../../services/CargoRoad/cargoRoad";
+import { getCargoRoadList, getCommodityList, addCargoRoad, editCommodity } from "../../services/CargoRoad/cargoRoad";
 
 export default {
   namespace: 'cargoRoad',
@@ -30,6 +29,12 @@ export default {
     },
     *addCargoRoad({ callback, payload }, { call }) {
       const response = yield call(addCargoRoad, payload);
+      if (callback) {
+        callback();
+      }
+    },
+    *editCommodity({ callback, payload }, { call }) {
+      const response = yield call(editCommodity, payload);
       if (callback) {
         callback();
       }

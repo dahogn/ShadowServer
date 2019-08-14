@@ -64,8 +64,11 @@ export default class CommodityTableForm extends PureComponent {
     const newData = this.state.data.map(item => ({ ...item }));
     const target = this.getRowByKey(key, newData);
     if (target) {
-      // target[fieldName] = e.target.value;
-      target[fieldName] = e;
+      if (typeof(e) === "number" || e.target === undefined) {
+        target[fieldName] = e;
+      } else {
+        target[fieldName] = e.target.value;
+      }
       this.setState({ data: newData });
     }
   }
@@ -145,7 +148,6 @@ export default class CommodityTableForm extends PureComponent {
             return (
               <Input
                 value={text}
-                autoFocus
                 onChange={e => this.handleFieldChange(e, 'name', record.sri)}
                 onKeyPress={e => this.handleKeyPress(e, record.sri)}
                 placeholder="商品名称"

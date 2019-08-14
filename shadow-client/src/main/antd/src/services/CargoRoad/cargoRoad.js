@@ -14,3 +14,10 @@ export async function addCargoRoad(params) {
     body: params,
   });
 }
+
+export async function editCommodity(params) {
+  return request('/demo/commodity', {
+    method: 'PUT',
+    body: params,
+  })
+}

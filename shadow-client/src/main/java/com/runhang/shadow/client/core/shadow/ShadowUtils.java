@@ -8,6 +8,7 @@ import com.runhang.shadow.client.core.exception.NoTopicException;
 import com.runhang.shadow.client.core.sync.database.DatabaseQueue;
 import com.runhang.shadow.client.core.sync.push.ControlPush;
 import com.runhang.shadow.client.device.entity.ShadowEntity;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -235,6 +236,20 @@ public class ShadowUtils {
      */
     public static ShadowEntity getEntity(String sri) {
         return EntityFactory.getEntity(sri);
+    }
+
+    /**
+     * @Description 增加实体
+     * @param entity 实体
+     * @author szh
+     * @Date 2019/8/14 13:44
+     */
+    public static void addEntity(ShadowEntity entity) throws NoTopicException, NoSriException {
+        List<String> entityNames = ClassUtils.getAllEntityName();
+        if (StringUtils.isEmpty(entity.getEntityTopic())) {
+            throw new NoTopicException();
+        }
+        EntityFactory.injectEntities(entity, entity.getEntityTopic(), entityNames);
     }
 
 }

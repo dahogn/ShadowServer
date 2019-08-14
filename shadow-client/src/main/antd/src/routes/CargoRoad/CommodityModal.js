@@ -15,7 +15,7 @@ export default class CommodityModal extends Component{
     e.preventDefault();
     validateFields((err, values) => {
       if (!err) {
-
+        onSubmit(values);
       }
     });
   };
