@@ -1,7 +1,7 @@
 # 影子数据流
 ### 一、影子结构
 shadow包中为内存影子类组成，comm包中为通信使用的bean
-![类图](https://github.com/shengzh10/ShadowServer2/raw/master/shadow-client/doc/Class%20Diagram.jpg "影子类图")
+[类图](https://github.com/shengzh10/ShadowServer2/raw/master/shadow-client/doc/Class%20Diagram.jpg "影子类图")
 ### 二、应用程序更改设备状态
 开发者在修改完设备影子信息之后调用ShadowFactory的commitAntPush方法提交更改并推送期望状态到设备。
 1. 以在售货机中增加一个货道为例，commit提交更改后内存中影子文档为
@@ -47,7 +47,17 @@ shadow包中为内存影子类组成，comm包中为通信使用的bean
     "version":1
 }
 ```
-2. 影子更新完成后发送到 get/${deviceTopic} 主题中
+2. 影子更新完成后发送到 get/${deviceTopic} 主题中  
+desired为服务器端对设备端的期望数据，其中add为list增加实体，update为对实体属性的更新，delete为删除list中的实体，下面是以add为例的字段含义
+
+字段|字段名称|字段含义
+:---|:---|:---
+className|实体类名|增加的实体类名
+sri|影子资源标识符|系统自动生成的实体标识符
+parentSri|父级影子资源标识符|要修改的属性所属的父级实体的实体标识符
+fieldName|属性名称|要修改的属性在所属父级实体中的属性名称
+field|实体属性|增加的实体所有的属性值
+
 ```json
 {
     "method": "control",
@@ -60,6 +70,7 @@ shadow包中为内存影子类组成，comm包中为通信使用的bean
                         "className":"CargoRoad",
                         "sri":"CargoRoad_1560758107239_367",
                         "parentSri":"Vending_1560758107221_553",
+                        "fieldName":"cargoRoad",
                         "field":{
                             "serial":1,
                             "commodity":[
@@ -129,7 +140,7 @@ shadow包中为内存影子类组成，comm包中为通信使用的bean
 ```
 ### 三、设备主动上报状态
 1. 设备发送状态到影子服务器 update/${deviceTopic}  
-desired为null的时候表示设备端更新数据成功，清空服务器端的影子desired数据
+desired为null的时候表示设备端更新数据成功，清空服务器端的影子desired数据，为保证设备端与数据库中sri一致性，新增的实体的sri需要设备端自动生成
 ```json
 {
     "method":"update",
@@ -202,7 +213,7 @@ desired为null的时候表示设备端更新数据成功，清空服务器端的
 错误码说明
 
 错误码|含义
-:---:|:---:
+:---:|:---
 400|不正确的JSON格式
 401|影子JSON缺少method信息
 402|影子JSON缺少state字段
