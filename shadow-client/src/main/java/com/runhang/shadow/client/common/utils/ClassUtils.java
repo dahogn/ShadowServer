@@ -158,6 +158,9 @@ public class ClassUtils {
             List<Object> list = (List<Object>) getValue(obj, fieldName);
             if (null != list) {
                 list.add(toAdd);
+            } else {
+                List<Object> newList = Collections.singletonList(toAdd);
+                setValue(obj, fieldName, newList);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
